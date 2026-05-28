@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jottum!</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0e0e12;
+    --surface: #1a1a22;
+    --surface2: #24242e;
+    --accent: #ff6b1a;
+    --accent2: #ff6b6b;
+    --accent3: #6bffc8;
+    --text: #f0eeea;
+    --muted: #888;
+    --radius: 20px;
+    --font: 'Outfit', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: 400;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  .header {
+    width: 100%;
+    padding: 2rem 2rem 1rem;
+    text-align: center;
+  }
+
+  .logo-img {
+    height: 100px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 0.25rem;
+  }
+
+  .tagline {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 480px;
+    padding: 1rem 1.5rem 3rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .screen.active { display: flex; }
+
+  /* HOME */
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .home-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.8rem 1.2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    border: 1.5px solid transparent;
+  }
+
+  .home-card:hover {
+    background: var(--surface2);
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .home-card .icon { font-size: 2.5rem; margin-bottom: 0.6rem; }
+  .home-card h3 { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .home-card p { font-size: 0.78rem; font-weight: 400; color: var(--muted); margin-top: 4px; }
+
+  /* SUBMENU */
+  .submenu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .submenu-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 2rem 1.2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    border: 1.5px solid transparent;
+  }
+
+  .submenu-card:hover {
+    background: var(--surface2);
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .submenu-card .icon { font-size: 2.8rem; margin-bottom: 0.7rem; }
+  .submenu-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  .submenu-card p { font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 4px; }
+
+  /* PLAYER SETUP */
+  .player-setup {
+    width: 100%;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+
+  .player-setup h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .player-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+    font-family: var(--font);
+  }
+
+  .player-avatar.p1 { background: var(--accent); color: #fff; }
+  .player-avatar.p2 { background: var(--accent2); color: #fff; }
+
+  .player-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .player-input:focus { border-color: var(--accent); }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.85rem 1.8rem;
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+    width: 100%;
+  }
+
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn:active { transform: scale(0.98); }
+
+  /* SWIPE */
+  .swipe-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .player-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border-radius: 50px;
+    padding: 0.4rem 1rem 0.4rem 0.5rem;
+  }
+
+  .player-indicator .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .progress-text { font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+
+  .card-stack {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    margin: 0.5rem 0;
+  }
+
+  .swipe-card {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.08s ease;
+    border: 1.5px solid #2a2a35;
+  }
+
+  .swipe-card .card-emoji { font-size: 4rem; }
+  .swipe-card .card-title { font-size: 1.5rem; font-weight: 700; text-align: center; font-family: var(--font); }
+  .swipe-card .card-sub { font-size: 0.85rem; font-weight: 400; color: var(--muted); text-align: center; }
+
+  .vote-label {
+    position: absolute;
+    top: 1.2rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.1s;
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+  }
+
+  .vote-label.yes { right: 1.2rem; color: var(--accent3); border: 2px solid var(--accent3); }
+  .vote-label.no { left: 1.2rem; color: var(--accent2); border: 2px solid var(--accent2); }
+
+  .swipe-buttons {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+  }
+
+  .swipe-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .swipe-btn:hover { transform: scale(1.1); }
+  .swipe-btn:active { transform: scale(0.95); }
+  .swipe-btn.no { background: #2a1a1a; color: var(--accent2); border: 1.5px solid var(--accent2); }
+  .swipe-btn.yes { background: #0e2a1e; color: var(--accent3); border: 1.5px solid var(--accent3); }
+
+  /* RESULT */
+  .result-screen { width: 100%; }
+
+  .result-title { font-size: 1rem; font-weight: 400; color: var(--muted); text-align: center; margin-bottom: 0.5rem; }
+
+  .result-winner {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: center;
+    border: 2px solid var(--accent);
+  }
+
+  .result-winner .big-emoji { font-size: 3.5rem; margin-bottom: 0.5rem; }
+  .result-winner h2 { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+
+  .result-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .result-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .result-item .name { font-size: 0.95rem; font-weight: 400; }
+  .vote-dots { display: flex; gap: 4px; }
+  .vote-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .vote-dot.yes { background: var(--accent3); }
+  .vote-dot.no { background: #333; border: 1px solid #555; }
+
+  /* WHEEL */
+  .wheel-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .wheel-wrapper { position: relative; width: 280px; height: 280px; }
+  #wheelCanvas { border-radius: 50%; }
+
+  .wheel-pointer {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    z-index: 10;
+  }
+
+  .wheel-inputs {
+    width: 100%;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+  }
+
+  .wheel-inputs h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; }
+
+  .input-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+  .input-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 0.55rem 0.9rem;
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  .input-row input:focus { border-color: var(--accent); }
+
+  .add-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .option-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+
+  .option-tag {
+    background: var(--surface2);
+    border-radius: 50px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .option-tag button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .spin-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 0.85rem 2.5rem;
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .spin-btn:hover { transform: scale(1.03); }
+  .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .wheel-result { font-size: 1.4rem; font-weight: 700; color: var(--accent); text-align: center; min-height: 2rem; }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 0;
+    align-self: flex-start;
+  }
+
+  .back-btn:hover { color: var(--text); }
+
+  .player-turn-banner {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    width: 100%;
+    border: 1.5px solid var(--surface2);
+  }
+
+  .player-turn-banner .turn-name { font-size: 1.1rem; font-weight: 700; }
+  .player-turn-banner .turn-sub { font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
+
+  .screen-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    align-self: flex-start;
+  }
+
+  .transition-fade { animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slot-window {
+    width: 68px;
+    height: 76px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1.5px solid #444;
+  }
+  .slot-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .slot-cell {
+    width: 68px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="logo-img" src="logo.png" alt="Jottum!">
+  <div class="tagline">Van vraagteken naar jottum!</div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="home-grid">
+    <div class="home-card" onclick="showSubmenu('eten')">
+      <div class="icon">🍽️</div>
+      <h3>Wat eten we?</h3>
+      <p>Lunch of diner</p>
+    </div>
+    <div class="home-card" onclick="showSubmenu('kijken')">
+      <div class="icon">🎬</div>
+      <h3>Wat kijken we?</h3>
+      <p>Film of serie</p>
+    </div>
+    <div class="home-card" style="grid-column: 1 / -1;" onclick="showScreen('screen-wheel')">
+      <div class="icon">🎡</div>
+      <h3>Rad van fortuin</h3>
+      <p>Vul zelf opties in en draai</p>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMENU ETEN -->
+<div id="screen-submenu-eten" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
+  <div class="screen-title">Wat eten we?</div>
+  <div class="submenu-grid">
+    <div class="submenu-card" onclick="startGame('lunch')">
+      <div class="icon">☀️</div>
+      <h3>Lunch</h3>
+      <p>Lekker & licht overdag</p>
+    </div>
+    <div class="submenu-card" onclick="startGame('diner')">
+      <div class="icon">🌙</div>
+      <h3>Diner</h3>
+      <p>Uitgebreid 's avonds</p>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMENU KIJKEN -->
+<div id="screen-submenu-kijken" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
+  <div class="screen-title">Wat kijken we?</div>
+  <div class="submenu-grid">
+    <div class="submenu-card" onclick="startGame('film')">
+      <div class="icon">🎬</div>
+      <h3>Film</h3>
+      <p>Eenmalig, ~2 uur</p>
+    </div>
+    <div class="submenu-card" onclick="startGame('serie')">
+      <div class="icon">📺</div>
+      <h3>Serie</h3>
+      <p>Bingen & doorkijken</p>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER SETUP -->
+<div id="screen-players" class="screen">
+  <button class="back-btn" id="players-back-btn" onclick="playersBack()">← terug</button>
+  <div class="player-setup">
+    <h2>Wie spelen er mee?</h2>
+    <div class="player-row">
+      <div class="player-avatar p1">1</div>
+      <input class="player-input" id="player1-name" type="text" placeholder="Speler 1" value="Speler 1" />
+    </div>
+    <div class="player-row">
+      <div class="player-avatar p2">2</div>
+      <input class="player-input" id="player2-name" type="text" placeholder="Speler 2" value="Speler 2" />
+    </div>
+  </div>
+  <button class="btn" onclick="startSwipe()">Starten →</button>
+  <button class="btn secondary" onclick="startWildcard()">🎲 Wildcard</button>
+</div>
+
+<!-- SWIPE -->
+<div id="screen-swipe" class="screen">
+  <div class="swipe-header">
+    <div class="player-indicator">
+      <div class="dot" id="player-dot" style="background: var(--accent);"></div>
+      <span id="current-player-name" style="font-size:0.85rem; font-weight:500;">Speler 1</span>
+    </div>
+    <div class="progress-text" id="progress-text">1 / 12</div>
+  </div>
+
+  <div class="player-turn-banner">
+    <div class="turn-name" id="turn-name">Speler 1 is aan de beurt</div>
+    <div class="turn-sub">Swipe of gebruik de knoppen hieronder</div>
+  </div>
+
+  <div class="card-stack">
+    <div class="swipe-card" id="swipe-card" onmousedown="dragStart(event)" ontouchstart="dragStart(event)">
+      <div class="vote-label yes" id="label-yes">✅ JA</div>
+      <div class="vote-label no" id="label-no">❌ NEE</div>
+      <div class="card-emoji" id="card-emoji">🍕</div>
+      <div class="card-title" id="card-title">Pizza</div>
+      <div class="card-sub" id="card-sub"></div>
+    </div>
+  </div>
+
+  <div class="swipe-buttons">
+    <button class="swipe-btn no" onclick="vote(false)">❌</button>
+    <button class="swipe-btn yes" onclick="vote(true)">✅</button>
+  </div>
+
+  <button class="back-btn" onclick="confirmBack()">← terug naar overzicht</button>
+</div>
+
+<!-- HANDOFF -->
+<div id="screen-handoff" class="screen">
+  <div style="text-align:center; padding: 2rem 0;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">👏</div>
+    <h2 style="font-size: 1.4rem; font-weight:700;" id="handoff-title">Klaar!</h2>
+    <p style="color: var(--muted); margin-top: 0.5rem; font-size: 0.9rem;" id="handoff-sub">Geef het scherm door</p>
+  </div>
+  <button class="btn" id="handoff-btn" onclick="nextPlayer()">Doorgeven →</button>
+  <button class="back-btn" onclick="showScreen('screen-home')" style="align-self:center;">← terug naar overzicht</button>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen">
+  <div class="result-screen transition-fade">
+    <div class="result-title" id="result-subtitle">Jullie match</div>
+    <div class="result-winner">
+      <div class="big-emoji" id="result-emoji">🎉</div>
+      <h2 id="result-name">Resultaat</h2>
+      <p style="color:var(--muted); font-size:0.85rem; font-weight:400; margin-top:0.5rem;" id="result-desc"></p>
+    </div>
+    <div class="result-list" id="result-list"></div>
+  </div>
+  <button class="btn" onclick="showScreen('screen-home')" style="margin-top:1rem;">← terug naar overzicht</button>
+</div>
+
+<!-- WHEEL -->
+<div id="screen-wheel" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-home')">← terug naar overzicht</button>
+  <div class="wheel-container">
+    <div class="wheel-wrapper">
+      <div class="wheel-pointer">▼</div>
+      <canvas id="wheelCanvas" width="280" height="280"></canvas>
+    </div>
+    <div class="wheel-result" id="wheel-result"></div>
+    <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Draaien!</button>
+  </div>
+  <div class="wheel-inputs">
+    <h3>Voeg opties toe</h3>
+    <div class="input-row">
+      <input type="text" id="wheel-input" placeholder="Bijv. McDonalds..." onkeydown="if(event.key==='Enter') addWheelOption()" />
+      <button class="add-btn" onclick="addWheelOption()">+</button>
+    </div>
+    <div class="option-tags" id="option-tags"></div>
+  </div>
+</div>
+
+<!-- WILDCARD -->
+<div id="screen-wildcard" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-players')">← terug</button>
+  <div style="width:100%; text-align:center;">
+    <div style="font-size:1rem; font-weight:400; color:var(--muted); margin-bottom:1.5rem;">Trek aan de hendel voor een willekeurige uitkomst</div>
+    <div style="display:flex; justify-content:center; align-items:flex-start; gap:1.5rem; margin-bottom:1.5rem;">
+      <div style="background:var(--surface); border-radius:20px; padding:1.2rem 1rem; border:2px solid #333; display:inline-block;">
+        <div style="display:flex; gap:8px;">
+          <div class="slot-window"><div class="slot-inner" id="inner-0"></div></div>
+          <div class="slot-window"><div class="slot-inner" id="inner-1"></div></div>
+          <div class="slot-window"><div class="slot-inner" id="inner-2"></div></div>
+        </div>
+      </div>
+      <div id="lever-wrap" style="display:flex; flex-direction:column; align-items:center; padding-top:0.4rem; cursor:pointer;" onclick="pullLever()">
+        <div id="lever-ball" style="width:30px; height:30px; background:var(--accent); border-radius:50%; border:3px solid #c94d00; transition:transform 0.2s; box-shadow:0 2px 8px rgba(255,107,26,0.4);"></div>
+        <div id="lever-stick" style="width:8px; height:90px; background:#666; border-radius:4px; margin-top:3px; transform-origin:top center; transition:transform 0.3s ease;"></div>
+        <div style="width:26px; height:14px; background:#444; border-radius:5px; margin-top:2px; border:1.5px solid #555;"></div>
+      </div>
+    </div>
+    <div id="wildcard-result" style="min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem;">
+      <div style="font-size:0.85rem; color:var(--muted);">Trek aan de hendel om te beginnen</div>
+    </div>
+  </div>
+  <button class="btn" id="wildcard-home-btn" style="display:none; margin-top:1rem;" onclick="showScreen('screen-home')">← terug naar overzicht</button>
+</div>
+
+
+<script>
+const GAMES = {
+  lunch: {
+    label: 'Lunch',
+    parentMenu: 'screen-submenu-eten',
+    cards: [
+      { emoji: '🥪', title: 'Tosti', sub: 'warm, knapperig & makkelijk' },
+      { emoji: '🍞', title: 'Broodje kroket', sub: 'klassiek & lekker vet' },
+      { emoji: '🍜', title: 'Soep', sub: 'warm & voedzaam' },
+      { emoji: '🥗', title: 'Salade', sub: 'fris & licht' },
+      { emoji: '🌯', title: 'Wrap', sub: 'gevuld & makkelijk mee te nemen' },
+      { emoji: '🍣', title: 'Sushi', sub: 'Japans & vers' },
+      { emoji: '🥗', title: 'Poke bowl', sub: 'gezond & kleurrijk' },
+      { emoji: '🥖', title: 'Broodje', sub: 'met beleg naar keuze' },
+      { emoji: '🍜', title: 'Ramen', sub: 'noodles in bouillon' },
+      { emoji: '🥞', title: 'Pannenkoeken', sub: 'zoet of hartig' },
+      { emoji: '🍳', title: 'Uitsmijter', sub: 'eieren op brood, altijd goed' },
+      { emoji: '🥙', title: 'Broodje shoarma', sub: 'pittig & hartig' },
+    ]
+  },
+  diner: {
+    label: 'Diner',
+    parentMenu: 'screen-submenu-eten',
+    cards: [
+      { emoji: '🍕', title: 'Pizza', sub: 'bezorgen of zelf maken' },
+      { emoji: '🍝', title: 'Pasta', sub: 'Italiaans & comfort' },
+      { emoji: '🍣', title: 'Sushi', sub: 'Japans & vers' },
+      { emoji: '🌮', title: 'Mexicaans', sub: 'taco\'s, burrito\'s, guac' },
+      { emoji: '🥡', title: 'Chinees / Thais', sub: 'noodles, dim sum, wokken' },
+      { emoji: '🍖', title: 'Shoarma of döner', sub: 'wraps & sauzen' },
+      { emoji: '🍔', title: 'Burger', sub: 'beef, chicken of vega' },
+      { emoji: '🍛', title: 'Indiaas', sub: 'curry, naan & rijst' },
+      { emoji: '🍟', title: 'Patat', sub: 'patat, kroket, bitterballen' },
+      { emoji: '🇳🇱', title: 'Hollandse pot', sub: 'stamppot, erwtensoep' },
+      { emoji: '🥩', title: 'BBQ / Grill', sub: 'vlees, vis of vega van de grill' },
+      { emoji: '🥗', title: 'Poke bowl', sub: 'fris & gezond' },
+    ]
+  },
+  film: {
+    label: 'Film',
+    parentMenu: 'screen-submenu-kijken',
+    cards: [
+      { emoji: '😂', title: 'Comedy', sub: 'lachen & relaxen' },
+      { emoji: '😱', title: 'Thriller', sub: 'spanning van begin tot eind' },
+      { emoji: '💥', title: 'Actie', sub: 'explosies, gevechten & snelheid' },
+      { emoji: '💕', title: 'Romantiek', sub: 'liefde & drama' },
+      { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie' },
+      { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen' },
+      { emoji: '👻', title: 'Horror', sub: 'enge films & jumpscares' },
+      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd' },
+      { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief' },
+      { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand' },
+      { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives' },
+      { emoji: '🦸', title: 'Superhelden', sub: 'Marvel, DC & fantasy' },
+    ]
+  },
+  serie: {
+    label: 'Serie',
+    parentMenu: 'screen-submenu-kijken',
+    cards: [
+      { emoji: '😂', title: 'Comedy', sub: 'lachen & relaxen' },
+      { emoji: '😱', title: 'Thriller', sub: 'spanning van begin tot eind' },
+      { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives' },
+      { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand' },
+      { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie' },
+      { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen' },
+      { emoji: '👻', title: 'Horror', sub: 'enge series & jumpscares' },
+      { emoji: '💕', title: 'Romantiek', sub: 'liefde, drama & spanning' },
+      { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief' },
+      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd' },
+      { emoji: '🌟', title: 'Reality', sub: 'echte mensen, echte drama' },
+      { emoji: '👾', title: 'Miniserie', sub: 'compact verhaal in 3-6 afleveringen' },
+    ]
+  }
+};
+
+let currentGame = null;
+let currentCards = [];
+let currentCardIndex = 0;
+let currentPlayer = 0;
+let playerNames = ['Speler 1', 'Speler 2'];
+let votes = [[], []];
+let isDragging = false;
+let startX = 0;
+let currentX = 0;
+const card = () => document.getElementById('swipe-card');
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-wheel') drawWheel();
+}
+
+function showSubmenu(type) {
+  showScreen('screen-submenu-' + type);
+}
+
+function startGame(game) {
+  currentGame = game;
+  showScreen('screen-players');
+}
+
+function playersBack() {
+  const parentMenu = GAMES[currentGame] ? GAMES[currentGame].parentMenu : 'screen-home';
+  showScreen(parentMenu || 'screen-home');
+}
+
+function confirmBack() {
+  if (confirm('Wil je stoppen en terug naar het overzicht?')) {
+    showScreen('screen-home');
+  }
+}
+
+function startSwipe() {
+  playerNames[0] = document.getElementById('player1-name').value || 'Speler 1';
+  playerNames[1] = document.getElementById('player2-name').value || 'Speler 2';
+  currentCards = [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5);
+  currentCardIndex = 0;
+  currentPlayer = 0;
+  votes = [Array(currentCards.length).fill(null), Array(currentCards.length).fill(null)];
+  showScreen('screen-swipe');
+  updateSwipeUI();
+}
+
+function updateSwipeUI() {
+  const c = currentCards[currentCardIndex];
+  document.getElementById('card-emoji').textContent = c.emoji;
+  document.getElementById('card-title').textContent = c.title;
+  document.getElementById('card-sub').textContent = c.sub;
+  document.getElementById('progress-text').textContent = (currentCardIndex + 1) + ' / ' + currentCards.length;
+  document.getElementById('current-player-name').textContent = playerNames[currentPlayer];
+  document.getElementById('player-dot').style.background = currentPlayer === 0 ? 'var(--accent)' : 'var(--accent2)';
+  document.getElementById('turn-name').textContent = playerNames[currentPlayer] + ' is aan de beurt';
+  document.getElementById('label-yes').style.opacity = 0;
+  document.getElementById('label-no').style.opacity = 0;
+  card().style.transform = 'none';
+  card().className = 'swipe-card';
+}
+
+function vote(yes) {
+  votes[currentPlayer][currentCardIndex] = yes;
+  animateCard(yes);
+}
+
+function animateCard(yes) {
+  const c = card();
+  c.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  c.style.transform = yes ? 'translateX(120%) rotate(15deg)' : 'translateX(-120%) rotate(-15deg)';
+  c.style.opacity = '0';
+  setTimeout(() => {
+    c.style.transition = '';
+    c.style.opacity = '1';
+    nextCard();
+  }, 300);
+}
+
+function nextCard() {
+  currentCardIndex++;
+  if (currentCardIndex >= currentCards.length) {
+    if (currentPlayer === 0) {
+      currentPlayer = 1;
+      currentCardIndex = 0;
+      document.getElementById('handoff-title').textContent = playerNames[0] + ' is klaar!';
+      document.getElementById('handoff-sub').textContent = 'Geef het scherm door aan ' + playerNames[1];
+      document.getElementById('handoff-btn').textContent = playerNames[1] + ' is er klaar voor →';
+      showScreen('screen-handoff');
+    } else {
+      showResult();
+    }
+  } else {
+    updateSwipeUI();
+  }
+}
+
+function nextPlayer() {
+  showScreen('screen-swipe');
+  updateSwipeUI();
+}
+
+function showResult() {
+  const matches = [];
+  const partial = [];
+
+  currentCards.forEach((c, i) => {
+    const v1 = votes[0][i];
+    const v2 = votes[1][i];
+    if (v1 && v2) matches.push({ card: c, v1, v2 });
+    else if (v1 || v2) partial.push({ card: c, v1, v2 });
+  });
+
+  const winner = matches.length > 0
+    ? matches[Math.floor(Math.random() * matches.length)].card
+    : partial.length > 0 ? partial[0].card : null;
+
+  document.getElementById('result-subtitle').textContent =
+    matches.length > 0 ? '🎉 Jullie zijn het eens over:' : '😅 Geen volledige match, beste optie:';
+
+  if (winner) {
+    document.getElementById('result-emoji').textContent = winner.emoji;
+    document.getElementById('result-name').textContent = winner.title;
+    document.getElementById('result-desc').textContent = winner.sub;
+  }
+
+  const listEl = document.getElementById('result-list');
+  listEl.innerHTML = '';
+  [...matches, ...partial].slice(0, 6).forEach(({ card, v1, v2 }) => {
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    row.innerHTML = `
+      <span style="font-size:1.3rem">${card.emoji}</span>
+      <span class="name" style="flex:1">${card.title}</span>
+      <div class="vote-dots">
+        <div class="vote-dot ${v1 ? 'yes' : 'no'}" title="${playerNames[0]}"></div>
+        <div class="vote-dot ${v2 ? 'yes' : 'no'}" title="${playerNames[1]}"></div>
+      </div>`;
+    listEl.appendChild(row);
+  });
+
+  showScreen('screen-result');
+}
+
+// DRAG
+function dragStart(e) {
+  isDragging = true;
+  startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+  document.addEventListener('mousemove', dragMove);
+  document.addEventListener('mouseup', dragEnd);
+  document.addEventListener('touchmove', dragMove);
+  document.addEventListener('touchend', dragEnd);
+}
+
+function dragMove(e) {
+  if (!isDragging) return;
+  currentX = (e.type === 'touchmove' ? e.touches[0].clientX : e.clientX) - startX;
+  card().style.transform = `translateX(${currentX}px) rotate(${currentX * 0.08}deg)`;
+  const t = 50;
+  document.getElementById('label-yes').style.opacity = currentX > t ? Math.min((currentX - t) / 60, 1) : 0;
+  document.getElementById('label-no').style.opacity = currentX < -t ? Math.min((-currentX - t) / 60, 1) : 0;
+}
+
+function dragEnd() {
+  if (!isDragging) return;
+  isDragging = false;
+  document.removeEventListener('mousemove', dragMove);
+  document.removeEventListener('mouseup', dragEnd);
+  document.removeEventListener('touchmove', dragMove);
+  document.removeEventListener('touchend', dragEnd);
+  if (Math.abs(currentX) > 80) {
+    vote(currentX > 0);
+  } else {
+    card().style.transform = 'none';
+    document.getElementById('label-yes').style.opacity = 0;
+    document.getElementById('label-no').style.opacity = 0;
+  }
+  currentX = 0;
+}
+
+
+function startWildcard() {
+  playerNames[0] = document.getElementById('player1-name').value || 'Speler 1';
+  playerNames[1] = document.getElementById('player2-name').value || 'Speler 2';
+  const cards = GAMES[currentGame].cards;
+  const allEmojis = cards.map(c => c.emoji);
+  for (let i = 0; i < 3; i++) {
+    const inner = document.getElementById('inner-' + i);
+    inner.innerHTML = '';
+    for (let j = 0; j < 12; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'slot-cell';
+      cell.textContent = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+      inner.appendChild(cell);
+    }
+    inner.style.transition = 'none';
+    inner.style.transform = 'translateY(0)';
+  }
+  document.getElementById('wildcard-result').innerHTML = '<div style="font-size:0.85rem; color:var(--muted);">Trek aan de hendel om te beginnen</div>';
+  document.getElementById('wildcard-home-btn').style.display = 'none';
+  document.getElementById('lever-stick').style.transform = 'none';
+  document.getElementById('lever-ball').style.transform = 'none';
+  showScreen('screen-wildcard');
+}
+
+let leverPulled = false;
+
+function pullLever() {
+  if (leverPulled) return;
+  leverPulled = true;
+
+  const stick = document.getElementById('lever-stick');
+  const ball = document.getElementById('lever-ball');
+  stick.style.transform = 'rotate(30deg)';
+  ball.style.transform = 'translateX(28px) translateY(20px)';
+
+  setTimeout(() => {
+    stick.style.transform = 'none';
+    ball.style.transform = 'none';
+    spinSlots();
+  }, 350);
+}
+
+function spinSlots() {
+  const cards = GAMES[currentGame].cards;
+  const winner = cards[Math.floor(Math.random() * cards.length)];
+  const allEmojis = cards.map(c => c.emoji);
+  const cellH = 76;
+  const delays = [0, 400, 800];
+  const durations = [1200, 1600, 2100];
+
+  delays.forEach((delay, i) => {
+    const inner = document.getElementById('inner-' + i);
+    const cells = inner.children;
+    const total = cells.length;
+
+    // Set final emoji in last cell
+    cells[total - 1].textContent = winner.emoji;
+
+    const targetY = -((total - 1) * cellH);
+
+    setTimeout(() => {
+      inner.style.transition = 'transform ' + (durations[i] / 1000) + 's cubic-bezier(0.17, 0.67, 0.12, 1.0)';
+      inner.style.transform = 'translateY(' + targetY + 'px)';
+    }, delay);
+  });
+
+  const totalTime = delays[2] + durations[2];
+  setTimeout(() => {
+    document.getElementById('wildcard-result').innerHTML =
+      '<div style="font-size:3rem; margin-bottom:0.3rem;">' + winner.emoji + '</div>' +
+      '<div style="font-size:1.5rem; font-weight:700; color:var(--accent);">' + winner.title + '</div>' +
+      '<div style="font-size:0.85rem; color:var(--muted); margin-top:2px;">' + winner.sub + '</div>';
+    document.getElementById('wildcard-home-btn').style.display = 'block';
+    leverPulled = false;
+  }, totalTime + 200);
+}
+
+
+// WHEEL
+let wheelOptions = ['Pizza', 'Sushi', 'Pasta', 'Burger', 'Mexicaans'];
+let isSpinning = false;
+let wheelAngle = 0;
+
+function drawWheel() {
+  const canvas = document.getElementById('wheelCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 140, cy = 140, r = 130;
+  const n = wheelOptions.length;
+  ctx.clearRect(0, 0, 280, 280);
+
+  if (n === 0) {
+    ctx.fillStyle = '#1a1a22';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#555';
+    ctx.font = '14px Outfit';
+    ctx.textAlign = 'center';
+    ctx.fillText('Voeg opties toe', cx, cy);
+    return;
+  }
+
+  const colors = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8','#f472b6','#4ade80'];
+  const slice = (Math.PI * 2) / n;
+
+  for (let i = 0; i < n; i++) {
+    const start = wheelAngle + i * slice;
+    const end = start + slice;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+    ctx.strokeStyle = '#0e0e12';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + slice / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 13px Outfit';
+    const label = wheelOptions[i].length > 12 ? wheelOptions[i].slice(0, 12) + '…' : wheelOptions[i];
+    ctx.fillText(label, r - 10, 5);
+    ctx.restore();
+  }
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+  ctx.fillStyle = '#0e0e12';
+  ctx.fill();
+  ctx.strokeStyle = '#ff6b1a';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function spinWheel() {
+  if (isSpinning || wheelOptions.length < 2) return;
+  isSpinning = true;
+  document.getElementById('spin-btn').disabled = true;
+  document.getElementById('wheel-result').textContent = '';
+  const extraSpins = (5 + Math.random() * 5) * Math.PI * 2;
+  const startAngle = wheelAngle;
+  const duration = 3500;
+  const start = performance.now();
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  function frame(now) {
+    const t = Math.min((now - start) / duration, 1);
+    wheelAngle = startAngle + extraSpins * easeOut(t);
+    drawWheel();
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      wheelAngle = (startAngle + extraSpins) % (Math.PI * 2);
+      isSpinning = false;
+      document.getElementById('spin-btn').disabled = false;
+      const slice = (Math.PI * 2) / wheelOptions.length;
+      const normalized = ((Math.PI * 1.5 - wheelAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      document.getElementById('wheel-result').textContent = '🎉 ' + wheelOptions[Math.floor(normalized / slice) % wheelOptions.length] + '!';
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function addWheelOption() {
+  const input = document.getElementById('wheel-input');
+  const val = input.value.trim();
+  if (!val) return;
+  wheelOptions.push(val);
+  input.value = '';
+  renderTags();
+  drawWheel();
+}
+
+function removeWheelOption(i) {
+  wheelOptions.splice(i, 1);
+  renderTags();
+  drawWheel();
+}
+
+function renderTags() {
+  const el = document.getElementById('option-tags');
+  el.innerHTML = '';
+  wheelOptions.forEach((opt, i) => {
+    const tag = document.createElement('div');
+    tag.className = 'option-tag';
+    tag.innerHTML = `${opt} <button onclick="removeWheelOption(${i})">×</button>`;
+    el.appendChild(tag);
+  });
+}
+
+renderTags();
+</script>
+</body>
+</html>
