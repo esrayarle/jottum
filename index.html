@@ -846,7 +846,11 @@
     </div>
     <div class="result-list" id="result-list"></div>
   </div>
-  <button class="btn" onclick="showScreen('screen-home')" style="margin-top:1rem;">← terug naar overzicht</button>
+  <div style="display:flex; flex-direction:column; gap:0.5rem; width:100%; margin-top:1rem;">
+    <button class="btn" onclick="restartSameGame()">🔁 Opnieuw</button>
+    <button class="btn" onclick="chooseOtherCategory()" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">🔄 Andere categorie</button>
+    <button class="btn" onclick="endSession()" style="background:none; color:var(--muted); border:1.5px solid #333;">✕ Sessie afsluiten</button>
+  </div>
 </div>
 
 <!-- WHEEL -->
@@ -1717,6 +1721,52 @@ async function submitVotesToSession() {
     existing[myPlayerName || 'speler'] = votes[0];
     await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { votes: existing });
   } catch(e) {}
+}
+
+function restartSameGame() {
+  if (sessionId && isHost) {
+    // Reset session and go back to lobby
+    sbFetch('sessions?id=eq.' + sessionId, 'PATCH', {
+      started: false,
+      votes: {},
+      ready_list: [],
+      cards: [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5)
+    }).then(async () => {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=cards');
+      if (rows && rows[0]) currentCards = rows[0].cards;
+      document.getElementById('lobby-code').textContent = sessionId;
+      showScreen('screen-lobby');
+      pollLobby();
+    }).catch(() => {
+      showScreen('screen-modus');
+    });
+  } else if (sessionId && !isHost) {
+    // Joiner: go back to waiting screen
+    document.getElementById('waiting-code').textContent = sessionId;
+    showScreen('screen-waiting');
+    pollForStart(sessionId, myPlayerName);
+  } else {
+    // Solo: restart same game
+    currentCards = [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5);
+    currentCardIndex = 0;
+    currentPlayer = 0;
+    votes = playerNames.map(() => Array(currentCards.length).fill(null));
+    showScreen('screen-swipe');
+    updateSwipeUI();
+  }
+}
+
+function chooseOtherCategory() {
+  if (sessionPollInterval) clearInterval(sessionPollInterval);
+  const parent = GAMES[currentGame] ? GAMES[currentGame].parentMenu : 'screen-home';
+  showScreen(parent || 'screen-home');
+}
+
+function endSession() {
+  if (sessionPollInterval) clearInterval(sessionPollInterval);
+  sessionId = null;
+  isHost = false;
+  showScreen('screen-home');
 }
 
 // AUDIO
