@@ -622,14 +622,9 @@
 <div id="screen-join" class="screen">
   <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
 
-  <div style="text-align:center; width:100%;">
-    <div style="font-size:3rem; margin-bottom:0.5rem;">🔗</div>
-    <h2 style="font-size:1.3rem; font-weight:700;">Groepssessie</h2>
-  </div>
-
-  <!-- Deelnemen sectie -->
+  <!-- Deelnemen -->
   <div style="width:100%; background:var(--surface); border-radius:var(--radius); padding:1.2rem;">
-    <div style="font-size:0.95rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan bestaande sessie</div>
+    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan een spel</div>
     <input id="join-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%; margin-bottom:0.5rem;" />
     <input id="join-code-input" class="player-input" type="text" placeholder="Sessiecode (bijv. JOTT-1234)"
       style="width:100%; text-align:center; font-size:1.1rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;"
@@ -638,15 +633,13 @@
     <div id="join-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; margin-top:0.5rem; min-height:1rem;"></div>
   </div>
 
-  <div style="text-align:center; color:var(--muted); font-size:0.85rem;">— of —</div>
-
-  <!-- Host sectie -->
+  <!-- Maak een spel -->
   <div style="width:100%; background:var(--surface); border-radius:var(--radius); padding:1.2rem;">
-    <div style="font-size:0.95rem; font-weight:700; margin-bottom:0.75rem;">Groepssessie starten</div>
-    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.75rem;">Kies eerst een categorie, dan krijg je een code om te delen.</p>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
-      <button class="btn" onclick="showSubmenu('eten')" style="font-size:0.85rem; padding:0.7rem 0.5rem;">🍽️ Eten</button>
-      <button class="btn" onclick="showSubmenu('kijken')" style="font-size:0.85rem; padding:0.7rem 0.5rem;">🎬 Kijken</button>
+    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Maak een spel</div>
+    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+      <button class="btn" onclick="showSubmenu('eten')">🍽️ Wat eten we?</button>
+      <button class="btn" onclick="showSubmenu('kijken')">🎬 Wat kijken we?</button>
+      <button class="btn" onclick="showScreen('screen-wheel')" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">🎡 Rad van fortuin</button>
     </div>
   </div>
 </div>
