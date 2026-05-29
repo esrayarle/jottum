@@ -843,7 +843,9 @@
       <div class="big-emoji" id="result-emoji">🎉</div>
       <h2 id="result-name">Resultaat</h2>
       <p style="color:var(--muted); font-size:0.85rem; font-weight:400; margin-top:0.5rem;" id="result-desc"></p>
+      <div id="result-tip" style="display:none; margin-top:0.75rem; font-size:0.9rem; font-weight:600; color:var(--accent3); background:rgba(107,255,200,0.08); border-radius:10px; padding:0.5rem 0.75rem;"></div>
     </div>
+    <button id="result-snack-btn" onclick="startSnackSession()" style="display:none; width:100%; margin-top:0.75rem; background:var(--surface2); color:var(--text); border:1.5px solid #444; border-radius:12px; padding:0.85rem; font-family:var(--font); font-size:1rem; font-weight:700; cursor:pointer;">🍿 Kies snacks voor erbij!</button>
     <div class="result-list" id="result-list"></div>
   </div>
   <div id="result-host-btns" style="display:flex; flex-direction:column; gap:0.5rem; width:100%; margin-top:1rem;">
@@ -959,36 +961,52 @@ const GAMES = {
     label: 'Film',
     parentMenu: 'screen-submenu-kijken',
     cards: [
-      { emoji: '😂', title: 'Comedy', sub: 'lachen & relaxen' },
-      { emoji: '😱', title: 'Thriller', sub: 'spanning van begin tot eind' },
-      { emoji: '💥', title: 'Actie', sub: 'explosies, gevechten & snelheid' },
-      { emoji: '💕', title: 'Romantiek', sub: 'liefde & drama' },
-      { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie' },
-      { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen' },
-      { emoji: '👻', title: 'Horror', sub: 'enge films & jumpscares' },
-      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd' },
-      { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief' },
-      { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand' },
-      { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives' },
-      { emoji: '🦸', title: 'Superhelden', sub: 'Marvel, DC & fantasy' },
+      { emoji: '😂', title: 'Comedy', sub: 'lachen & relaxen', tips: ['The Grand Budapest Hotel', 'Superbad', 'Game Night', 'Knives Out'] },
+      { emoji: '😱', title: 'Thriller', sub: 'spanning van begin tot eind', tips: ['Parasite', 'Gone Girl', 'Oldboy', 'Prisoners'] },
+      { emoji: '💥', title: 'Actie', sub: 'explosies, gevechten & snelheid', tips: ['Mad Max: Fury Road', 'John Wick', 'Mission Impossible', 'The Dark Knight'] },
+      { emoji: '💕', title: 'Romantiek', sub: 'liefde & drama', tips: ['La La Land', 'About Time', 'The Notebook', 'Crazy Rich Asians'] },
+      { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie', tips: ['Interstellar', 'Arrival', 'Ex Machina', 'Everything Everywhere All At Once'] },
+      { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen', tips: ['Knives Out', 'The Prestige', 'Memento', 'Shutter Island'] },
+      { emoji: '👻', title: 'Horror', sub: 'enge films & jumpscares', tips: ['Hereditary', 'Get Out', 'A Quiet Place', 'The Conjuring'] },
+      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd', tips: ['Spider-Man: Into the Spider-Verse', 'Soul', 'Princess Mononoke', 'The Incredibles'] },
+      { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief', tips: ['Free Solo', 'Making a Murderer', 'The Social Dilemma', 'Icarus'] },
+      { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand', tips: ['The Shawshank Redemption', 'Schindlers List', 'Whiplash', '1917'] },
+      { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives', tips: ['Zodiac', 'Se7en', 'Heat', 'The Departed'] },
+      { emoji: '🦸', title: 'Superhelden', sub: 'Marvel, DC & fantasy', tips: ['The Dark Knight', 'Avengers: Endgame', 'Spider-Man: No Way Home', 'Thor: Ragnarok'] },
     ]
   },
   serie: {
     label: 'Serie',
     parentMenu: 'screen-submenu-kijken',
     cards: [
-      { emoji: '😂', title: 'Comedy', sub: 'lachen & relaxen' },
-      { emoji: '😱', title: 'Thriller', sub: 'spanning van begin tot eind' },
-      { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives' },
-      { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand' },
-      { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie' },
-      { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen' },
-      { emoji: '👻', title: 'Horror', sub: 'enge series & jumpscares' },
-      { emoji: '💕', title: 'Romantiek', sub: 'liefde, drama & spanning' },
-      { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief' },
-      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd' },
-      { emoji: '🌟', title: 'Reality', sub: 'echte mensen, echte drama' },
-      { emoji: '👾', title: 'Miniserie', sub: 'compact verhaal in 3-6 afleveringen' },
+      { emoji: '😂', title: 'Comedy', sub: 'lachen & relaxen', tips: ['Schitts Creek', 'Abbott Elementary', 'What We Do in the Shadows', 'Arrested Development'] },
+      { emoji: '😱', title: 'Thriller', sub: 'spanning van begin tot eind', tips: ['Ozark', 'Succession', 'The Night Of', 'Severance'] },
+      { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives', tips: ['True Detective', 'Mindhunter', 'The Wire', 'Breaking Bad'] },
+      { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand', tips: ['The Bear', 'Normal People', 'This Is Us', 'Succession'] },
+      { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie', tips: ['Black Mirror', 'Severance', 'Dark', 'Westworld'] },
+      { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen', tips: ['Dark', 'Twin Peaks', 'The Haunting of Hill House', 'Broadchurch'] },
+      { emoji: '👻', title: 'Horror', sub: 'enge series & jumpscares', tips: ['The Haunting of Hill House', 'Midnight Mass', 'Stranger Things', 'American Horror Story'] },
+      { emoji: '💕', title: 'Romantiek', sub: 'liefde, drama & spanning', tips: ['Normal People', 'Bridgerton', 'You', 'Emily in Paris'] },
+      { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief', tips: ['Making a Murderer', 'The Last Dance', 'Tiger King', 'Wild Wild Country'] },
+      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd', tips: ['Arcane', 'Bojack Horseman', 'Avatar: The Last Airbender', 'Rick and Morty'] },
+      { emoji: '🌟', title: 'Reality', sub: 'echte mensen, echte drama', tips: ['The Circle', 'Love is Blind', 'Squid Game: The Challenge', 'Survivor'] },
+      { emoji: '👾', title: 'Miniserie', sub: 'compact verhaal in 3-6 afleveringen', tips: ['Chernobyl', 'The Queens Gambit', 'Mare of Easttown', 'Band of Brothers'] },
+    ]
+  },
+  snacks: {
+    label: 'Snacks',
+    parentMenu: null,
+    cards: [
+      { emoji: '🍿', title: 'Popcorn', sub: 'zoet, gezouten of karamel' },
+      { emoji: '🍕', title: 'Pizza', sub: 'bezorgen of diepvries' },
+      { emoji: '🍟', title: 'Friet', sub: 'met saus erbij' },
+      { emoji: '🍫', title: 'Chocolade', sub: 'puur, melk of wit' },
+      { emoji: '🧀', title: 'Kaasplank', sub: 'met crackers & druiven' },
+      { emoji: '🌮', title: 'Nachos', sub: 'met guac & salsa' },
+      { emoji: '🍦', title: 'IJs', sub: 'een bakje of aan een stokje' },
+      { emoji: '🥨', title: 'Chips & dip', sub: 'zout & knapperig' },
+      { emoji: '🍬', title: 'Snoep', sub: 'zuur, zoet of allebei' },
+      { emoji: '🥐', title: 'Iets warms', sub: 'croissant, toast of wrap' },
     ]
   }
 };
@@ -1232,6 +1250,21 @@ function showResult(sessionVotes, sessionPlayers) {
       '<div style="display:flex;gap:3px;align-items:center;">' + avatars + '</div>';
     listEl.appendChild(row);
   });
+
+  // Show film/serie tip if applicable
+  const tipEl = document.getElementById('result-tip');
+  const snackEl = document.getElementById('result-snack-btn');
+  if (tipEl) tipEl.style.display = 'none';
+  if (snackEl) snackEl.style.display = 'none';
+
+  if (winner && (currentGame === 'film' || currentGame === 'serie') && winner.tips) {
+    const tip = winner.tips[Math.floor(Math.random() * winner.tips.length)];
+    if (tipEl) {
+      tipEl.textContent = '🎬 Tip: ' + tip;
+      tipEl.style.display = 'block';
+    }
+    if (snackEl) snackEl.style.display = 'block';
+  }
 
   // Show correct buttons based on role
   const hostBtns = document.getElementById('result-host-btns');
@@ -1813,6 +1846,24 @@ async function submitVotesToSession() {
     existing[myPlayerName || 'speler'] = votes[0];
     await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { votes: existing });
   } catch(e) {}
+}
+
+function startSnackSession() {
+  const prevGame = currentGame;
+  currentGame = 'snacks';
+  sessionId = null;
+  isHost = false;
+  if (currentModus === 'multi') {
+    initPlayers();
+    goToLobby();
+  } else {
+    currentCards = [...GAMES['snacks'].cards].sort(() => Math.random() - 0.5);
+    currentCardIndex = 0;
+    currentPlayer = 0;
+    votes = playerNames.map(() => Array(currentCards.length).fill(null));
+    showScreen('screen-swipe');
+    updateSwipeUI();
+  }
 }
 
 function restartSameGame() {
