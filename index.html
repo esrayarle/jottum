@@ -960,7 +960,7 @@ const GAMES = {
       { emoji: '🍛', title: 'Indiaas', sub: 'curry, naan & rijst' },
       { emoji: '🍟', title: 'Patat', sub: 'patat, kroket, bitterballen' },
       { emoji: '🇳🇱', title: 'Hollandse pot', sub: 'stamppot, erwtensoep' },
-      { emoji: '🥩', title: 'BBQ / Grill', sub: 'vlees, vis of vega van de grill' },
+      { emoji: '🥩', title: 'BBQ / Grill', sub: 'vlees & vis van de grill' },
       { emoji: '🥗', title: 'Poke bowl', sub: 'fris & gezond' },
     ]
   },
@@ -1407,6 +1407,28 @@ function spinSlots() {
       inner.style.transition = 'transform ' + (durations[i] / 1000) + 's cubic-bezier(0.17, 0.67, 0.12, 1.0)';
       inner.style.transform = 'translateY(' + targetY + 'px)';
     }, delay);
+  });
+
+  // Rolling tick sounds per reel, slowing down
+  delays.forEach((delay, i) => {
+    const duration = durations[i];
+    let elapsed = 0;
+    let interval = 60;
+    function tick() {
+      if (!audioCtx) return;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'square';
+      o.frequency.setValueAtTime(180 + Math.random() * 60, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      o.start(); o.stop(audioCtx.currentTime + 0.04);
+      elapsed += interval;
+      interval = Math.min(interval * 1.18, 400);
+      if (elapsed < duration) setTimeout(tick, interval);
+    }
+    setTimeout(tick, delay);
   });
 
   const totalTime = delays[2] + durations[2];
