@@ -846,10 +846,13 @@
     </div>
     <div class="result-list" id="result-list"></div>
   </div>
-  <div style="display:flex; flex-direction:column; gap:0.5rem; width:100%; margin-top:1rem;">
+  <div id="result-host-btns" style="display:flex; flex-direction:column; gap:0.5rem; width:100%; margin-top:1rem;">
     <button class="btn" onclick="restartSameGame()">🔁 Opnieuw</button>
     <button class="btn" onclick="chooseOtherCategory()" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">🔄 Andere categorie</button>
     <button class="btn" onclick="endSession()" style="background:none; color:var(--muted); border:1.5px solid #333;">✕ Sessie afsluiten</button>
+  </div>
+  <div id="result-guest-btns" style="display:none; width:100%; margin-top:1rem;">
+    <button class="btn" onclick="endSession()" style="background:none; color:var(--muted); border:1.5px solid #333;">✕ Sessie verlaten</button>
   </div>
 </div>
 
@@ -1230,6 +1233,17 @@ function showResult(sessionVotes, sessionPlayers) {
     listEl.appendChild(row);
   });
 
+  // Show correct buttons based on role
+  const hostBtns = document.getElementById('result-host-btns');
+  const guestBtns = document.getElementById('result-guest-btns');
+  if (sessionId && !isHost) {
+    if (hostBtns) hostBtns.style.display = 'none';
+    if (guestBtns) guestBtns.style.display = 'block';
+  } else {
+    if (hostBtns) hostBtns.style.display = 'flex';
+    if (guestBtns) guestBtns.style.display = 'none';
+  }
+
   showScreen('screen-result');
 }
 
@@ -1523,6 +1537,7 @@ function generateCode() {
 
 let sessionId = null;
 let sessionPollInterval = null;
+let resultsPollingInterval = null;
 let isHost = false;
 let myPlayerName = '';
 
@@ -1629,6 +1644,7 @@ async function hostStartGame() {
 
 function leaveLobby() {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
+  if (resultsPollingInterval) clearInterval(resultsPollingInterval);
   sessionId = null;
   isHost = false;
   showScreen('screen-players');
@@ -1737,13 +1753,14 @@ function pollForStart(code, name) {
 
 function leaveSession() {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
+  if (resultsPollingInterval) clearInterval(resultsPollingInterval);
   sessionId = null;
   showScreen('screen-home');
 }
 
 // -- SUBMIT VOTES --
 async function pollForResults() {
-  if (sessionPollInterval) clearInterval(sessionPollInterval);
+  if (resultsPollingInterval) clearInterval(resultsPollingInterval);
 
   async function checkResults() {
     try {
@@ -1756,9 +1773,11 @@ async function pollForResults() {
       // Show who is done
       const listEl = document.getElementById('results-waiting-list');
       if (listEl) {
+        const colors = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8'];
         listEl.innerHTML = players.map((p, i) => {
-          const done = votesData[p] && votesData[p].some(v => v !== null);
-          const colors = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8'];
+          // Done = votes array exists and has length equal to cards
+          const pVotes = votesData[p];
+          const done = pVotes && Array.isArray(pVotes) && pVotes.length === currentCards.length;
           const initials = p.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
           return '<div style="display:flex;align-items:center;gap:0.75rem;background:var(--surface2);border-radius:10px;padding:0.5rem 0.9rem;">' +
             '<div style="width:28px;height:28px;border-radius:50%;background:' + colors[i%6] + ';display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#000;">' + initials + '</div>' +
@@ -1768,17 +1787,21 @@ async function pollForResults() {
         }).join('');
       }
 
-      // Check if all players have voted
-      const allDone = players.every(p => votesData[p] && votesData[p].some(v => v !== null));
+      // All done = every player has a votes array of correct length
+      const allDone = players.length > 0 && players.every(p => {
+        const pVotes = votesData[p];
+        return pVotes && Array.isArray(pVotes) && pVotes.length === currentCards.length;
+      });
+
       if (allDone) {
-        clearInterval(sessionPollInterval);
+        clearInterval(resultsPollingInterval);
         showResult(votesData, players);
       }
     } catch(e) { console.error('pollForResults error:', e); }
   }
 
   checkResults();
-  sessionPollInterval = setInterval(checkResults, 1500);
+  resultsPollingInterval = setInterval(checkResults, 1500);
 }
 
 async function submitVotesToSession() {
