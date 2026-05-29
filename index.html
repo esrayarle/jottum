@@ -542,13 +542,38 @@
     font-size: 0.95rem;
   }
 
-  .lobby-player-dot {
-    width: 10px;
-    height: 10px;
+  .lobby-avatar {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: var(--accent3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
     flex-shrink: 0;
+    position: relative;
   }
+
+  .lobby-avatar .cowboy {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .lobby-ready-badge {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 50px;
+  }
+
+  .lobby-ready-badge.ready { background: #0e2a1e; color: var(--accent3); }
+  .lobby-ready-badge.waiting { background: var(--surface); color: var(--muted); }
 
   /* Confetti canvas */
   #confetti-canvas {
@@ -593,26 +618,42 @@
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
-  <div class="home-grid">
-    <div class="home-card" style="grid-column: 1 / -1; border-color: #333;" onclick="showScreen('screen-join')">
-      <div class="icon">🔗</div>
-      <h3>Groepssessie</h3>
-      <p>Starten of deelnemen via code</p>
+
+  <!-- Deelnemen sectie -->
+  <div style="width:100%; background:var(--surface); border-radius:var(--radius); padding:1.2rem;">
+    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan een sessie</div>
+    <div style="display:flex; gap:0.5rem;">
+      <input id="join-code-input" class="player-input" type="text" placeholder="Sessiecode"
+        style="flex:1; text-align:center; font-size:1rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;"
+        oninput="this.value=this.value.toUpperCase()" />
+      <button class="btn" onclick="showJoinName()" style="width:auto; padding:0 1.2rem; white-space:nowrap;">Deelnemen →</button>
     </div>
-    <div class="home-card" onclick="showSubmenu('eten')">
-      <div class="icon">🍽️</div>
-      <h3>Wat eten we?</h3>
-      <p>Lunch of diner</p>
+    <div id="join-name-row" style="display:none; margin-top:0.5rem; display:none;">
+      <input id="join-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%; margin-bottom:0.5rem;" />
+      <button class="btn" onclick="joinSession()">Doorgaan →</button>
     </div>
-    <div class="home-card" onclick="showSubmenu('kijken')">
-      <div class="icon">🎬</div>
-      <h3>Wat kijken we?</h3>
-      <p>Film of serie</p>
-    </div>
-    <div class="home-card" style="grid-column: 1 / -1;" onclick="showScreen('screen-wheel')">
-      <div class="icon">🎡</div>
-      <h3>Rad van fortuin</h3>
-      <p>Vul zelf opties in en draai</p>
+    <div id="join-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; margin-top:0.5rem; min-height:1rem;"></div>
+  </div>
+
+  <!-- Nieuwe sessie sectie -->
+  <div style="width:100%;">
+    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Nieuwe sessie starten</div>
+    <div class="home-grid">
+      <div class="home-card" onclick="showSubmenu('eten')">
+        <div class="icon">🍽️</div>
+        <h3>Wat eten we?</h3>
+        <p>Lunch of diner</p>
+      </div>
+      <div class="home-card" onclick="showSubmenu('kijken')">
+        <div class="icon">🎬</div>
+        <h3>Wat kijken we?</h3>
+        <p>Film of serie</p>
+      </div>
+      <div class="home-card" style="grid-column: 1 / -1;" onclick="showScreen('screen-wheel')">
+        <div class="icon">🎡</div>
+        <h3>Rad van fortuin</h3>
+        <p>Vul zelf opties in en draai</p>
+      </div>
     </div>
   </div>
 </div>
@@ -693,38 +734,41 @@
   <button class="back-btn" style="align-self:center; color:var(--accent);" onclick="goToLobby()">🔗 Starten als groepssessie</button>
 </div>
 
-<!-- LOBBY (host) -->
+<!-- LOBBY -->
 <div id="screen-lobby" class="screen">
   <button class="back-btn" onclick="leaveLobby()">← terug</button>
+
   <div style="text-align:center; width:100%;">
-    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:0.3rem;">Sessiecode</div>
-    <div id="lobby-code" style="font-size:2.8rem; font-weight:800; color:var(--accent); letter-spacing:6px; cursor:pointer;" onclick="copyCode()" title="Klik om te kopiëren">JOTT-XXXX</div>
+    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.3rem;">Sessiecode — klik om te kopiëren</div>
+    <div id="lobby-code" style="font-size:2.8rem; font-weight:800; color:var(--accent); letter-spacing:6px; cursor:pointer; user-select:all;" onclick="copyCode()">JOTT-XXXX</div>
     <div id="copy-toast" style="font-size:0.78rem; color:var(--accent3); margin-top:4px; min-height:1rem;"></div>
   </div>
 
   <div style="width:100%; background:var(--surface); border-radius:16px; padding:1.2rem;">
-    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Deelnemers</div>
+    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Lobby</div>
     <div id="lobby-players-list" style="display:flex; flex-direction:column; gap:0.5rem; min-height:3rem;">
       <div style="color:var(--muted); font-size:0.85rem;">Wachten op deelnemers...</div>
     </div>
   </div>
 
-  <div style="font-size:0.8rem; color:var(--muted); text-align:center;">Klik op de code om hem te kopiëren</div>
-  <button class="btn" id="lobby-start-btn" onclick="hostStartGame()">Starten →</button>
-  <button class="btn" onclick="startWildcard()" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">🎲 Gokken</button>
+  <button class="btn" onclick="hostStartGame()">Starten →</button>
+  <button class="back-btn" style="align-self:center;" onclick="leaveLobby()">← terug naar overzicht</button>
 </div>
 
-<!-- LOBBY (deelnemer wacht) -->
+<!-- WAITING (deelnemer) -->
 <div id="screen-waiting" class="screen">
-  <div style="text-align:center; padding:2rem 0; width:100%;">
-    <div style="font-size:3rem; margin-bottom:1rem;" id="waiting-emoji">⏳</div>
-    <h2 style="font-size:1.3rem; font-weight:700;" id="waiting-title">Wachten op de host...</h2>
-    <p style="color:var(--muted); font-size:0.9rem; margin-top:0.5rem;" id="waiting-sub">De host start het spel zo meteen</p>
-    <div style="margin-top:1.5rem; background:var(--surface); border-radius:14px; padding:1rem;">
-      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem;">Anderen in de lobby:</div>
-      <div id="waiting-players-list" style="font-size:0.9rem; color:var(--text);"></div>
-    </div>
+  <div style="text-align:center; width:100%;">
+    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.3rem;">Sessiecode</div>
+    <div id="waiting-code" style="font-size:2rem; font-weight:800; color:var(--accent); letter-spacing:4px; margin-bottom:1rem;"></div>
   </div>
+
+  <div style="width:100%; background:var(--surface); border-radius:16px; padding:1.2rem;">
+    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Lobby</div>
+    <div id="waiting-players-list" style="display:flex; flex-direction:column; gap:0.5rem; min-height:3rem;"></div>
+  </div>
+
+  <button class="btn" id="ready-btn" onclick="toggleReady()" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">✋ Ik ben er klaar voor!</button>
+  <p style="font-size:0.8rem; color:var(--muted); text-align:center;">Wachten tot de host het spel start...</p>
   <button class="back-btn" style="align-self:center;" onclick="leaveSession()">← verlaat sessie</button>
 </div>
 
@@ -1432,26 +1476,43 @@ function pollLobby() {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
   sessionPollInterval = setInterval(async () => {
     try {
-      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=players,started');
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=players,ready_list,started');
       if (!rows || !rows[0]) return;
       const players = rows[0].players || [];
-      renderLobbyPlayers(players);
+      const readyList = rows[0].ready_list || [];
+      renderLobbyPlayers(players, readyList);
     } catch(e) {}
   }, 2000);
 }
 
-function renderLobbyPlayers(players) {
-  const el = document.getElementById('lobby-players-list');
-  if (!players.length) {
-    el.innerHTML = '<div style="color:var(--muted); font-size:0.85rem;">Wachten op deelnemers...</div>';
-    return;
+function renderLobbyPlayers(players, readyList) {
+  const colors = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8'];
+  readyList = readyList || [];
+
+  function makeRow(p, i, isHost) {
+    const initials = p.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const color = colors[i % colors.length];
+    const isReady = isHost || readyList.includes(p);
+    return '<div class="lobby-player-row">' +
+      '<div class="lobby-avatar" style="background:' + color + '; color:#000;">' +
+      (isHost ? '<span class="cowboy">🤠</span>' : '') +
+      initials +
+      '</div>' +
+      '<span style="font-weight:500;">' + p + '</span>' +
+      '<span class="lobby-ready-badge ' + (isReady ? 'ready' : 'waiting') + '">' +
+      (isReady ? '✓ klaar' : 'wacht...') + '</span>' +
+      '</div>';
   }
-  el.innerHTML = players.map((p, i) =>
-    '<div class="lobby-player-row">' +
-    '<div class="lobby-player-dot" style="background:' + ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8'][i % 6] + '"></div>' +
-    '<span>' + p + (i === 0 ? ' <span style="font-size:0.75rem; color:var(--muted);">(host)</span>' : '') + '</span>' +
-    '</div>'
-  ).join('');
+
+  const lobbyEl = document.getElementById('lobby-players-list');
+  const waitEl = document.getElementById('waiting-players-list');
+
+  const html = players.length
+    ? players.map((p, i) => makeRow(p, i, i === 0)).join('')
+    : '<div style="color:var(--muted); font-size:0.85rem;">Wachten op deelnemers...</div>';
+
+  if (lobbyEl) lobbyEl.innerHTML = html;
+  if (waitEl) waitEl.innerHTML = html;
 }
 
 async function hostStartGame() {
@@ -1474,6 +1535,14 @@ function leaveLobby() {
 }
 
 // -- JOINER FLOW --
+
+function showJoinName() {
+  const code = document.getElementById('join-code-input').value.trim();
+  if (!code) { document.getElementById('join-error').textContent = 'Voer eerst een sessiecode in.'; return; }
+  document.getElementById('join-error').textContent = '';
+  const row = document.getElementById('join-name-row');
+  row.style.display = 'block';
+}
 
 async function joinSession() {
   const code = document.getElementById('join-code-input').value.trim().toUpperCase();
@@ -1499,8 +1568,6 @@ async function joinSession() {
     if (!players.includes(name)) players.push(name);
     await sbFetch('sessions?id=eq.' + code, 'PATCH', { players });
 
-    // Show waiting screen
-    document.getElementById('waiting-title').textContent = 'Welkom, ' + name + '!';
     showScreen('screen-waiting');
     pollForStart(code, name);
   } catch(e) {
@@ -1508,17 +1575,39 @@ async function joinSession() {
   }
 }
 
+let myReadyState = false;
+
+function toggleReady() {
+  myReadyState = !myReadyState;
+  const btn = document.getElementById('ready-btn');
+  btn.style.background = myReadyState ? '#0e2a1e' : 'var(--surface2)';
+  btn.style.color = myReadyState ? 'var(--accent3)' : 'var(--text)';
+  btn.style.borderColor = myReadyState ? 'var(--accent3)' : '#444';
+  btn.textContent = myReadyState ? '✓ Ik ben er klaar voor!' : '✋ Ik ben er klaar voor!';
+  updateReadyInSession();
+}
+
+async function updateReadyInSession() {
+  try {
+    const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=ready_list');
+    if (!rows || !rows[0]) return;
+    let readyList = rows[0].ready_list || [];
+    if (myReadyState && !readyList.includes(myPlayerName)) readyList.push(myPlayerName);
+    if (!myReadyState) readyList = readyList.filter(n => n !== myPlayerName);
+    await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { ready_list: readyList });
+  } catch(e) {}
+}
+
 function pollForStart(code, name) {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
+  document.getElementById('waiting-code').textContent = code;
+  myReadyState = false;
   sessionPollInterval = setInterval(async () => {
     try {
-      const rows = await sbFetch('sessions?id=eq.' + code + '&select=started,players,cards');
+      const rows = await sbFetch('sessions?id=eq.' + code + '&select=started,players,cards,ready_list');
       if (!rows || !rows[0]) return;
       const session = rows[0];
-
-      // Update players list in waiting screen
-      const players = session.players || [];
-      document.getElementById('waiting-players-list').textContent = players.join(', ');
+      renderLobbyPlayers(session.players || [], session.ready_list || []);
 
       if (session.started) {
         clearInterval(sessionPollInterval);
