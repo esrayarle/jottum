@@ -620,24 +620,24 @@
 <div id="screen-home" class="screen active">
 
   <!-- Deelnemen sectie -->
-  <div style="width:100%; background:var(--surface); border-radius:var(--radius); padding:1.2rem;">
-    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan een sessie</div>
+  <div style="width:100%;">
+    <div style="font-size:1.2rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan een sessie</div>
     <div style="display:flex; gap:0.5rem;">
-      <input id="join-code-input" class="player-input" type="text" placeholder="Sessiecode"
+      <input id="join-code-input" class="player-input" type="text" placeholder="Sessie-ID"
         style="flex:1; text-align:center; font-size:1rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;"
         oninput="this.value=this.value.toUpperCase()" />
-      <button class="btn" onclick="showJoinName()" style="width:auto; padding:0 1.2rem; white-space:nowrap;">Deelnemen →</button>
+      <button class="btn" onclick="showJoinName()" style="width:auto; padding:0 1.2rem; white-space:nowrap;">Deelnemen</button>
     </div>
-    <div id="join-name-row" style="display:none; margin-top:0.5rem; display:none;">
+    <div id="join-name-row" style="display:none; margin-top:0.5rem;">
       <input id="join-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%; margin-bottom:0.5rem;" />
-      <button class="btn" onclick="joinSession()">Doorgaan →</button>
+      <button class="btn" onclick="joinSession()">Doorgaan</button>
     </div>
     <div id="join-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; margin-top:0.5rem; min-height:1rem;"></div>
   </div>
 
   <!-- Nieuwe sessie sectie -->
   <div style="width:100%;">
-    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Nieuwe sessie starten</div>
+    <div style="font-size:1.2rem; font-weight:700; margin-bottom:0.75rem;">Nieuwe sessie starten</div>
     <div class="home-grid">
       <div class="home-card" onclick="showSubmenu('eten')">
         <div class="icon">🍽️</div>
