@@ -545,14 +545,6 @@
 <body>
 
 <canvas id="confetti-canvas"></canvas>
-<div id="pwa-banner" style="display:none; background:var(--surface); border-bottom:1px solid #333; padding:0.75rem 1.5rem; align-items:center; justify-content:space-between; gap:1rem; width:100%;">
-  <span style="font-size:0.85rem; color:var(--text);">📲 Voeg Jottum! toe aan je beginscherm</span>
-  <div style="display:flex; gap:0.5rem;">
-    <button onclick="installPWA()" style="background:var(--accent); color:#fff; border:none; border-radius:8px; padding:0.4rem 0.9rem; font-family:var(--font); font-weight:700; font-size:0.82rem; cursor:pointer;">Installeer</button>
-    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:none; border:none; color:var(--muted); font-size:1.2rem; cursor:pointer;">×</button>
-  </div>
-</div>
-
 <div class="header">
   <img class="logo-img" src="logo.png" alt="Jottum!">
   <div class="tagline">Van vraagteken naar jottum!</div>
@@ -1108,16 +1100,6 @@ function spinSlots() {
 
 
 // CONFETTI
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => {
-      deferredPrompt = null;
-      document.getElementById('pwa-banner').style.display = 'none';
-    });
-  }
-}
-
 function launchConfetti() {
   const canvas = document.getElementById('confetti-canvas');
   const ctx = canvas.getContext('2d');
@@ -1160,8 +1142,6 @@ function launchConfetti() {
   draw();
 }
 
-// PWA install prompt
-let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
