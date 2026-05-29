@@ -623,14 +623,11 @@
   <div style="width:100%;">
     <div style="font-size:1.2rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan een sessie</div>
     <div style="display:flex; gap:0.5rem;">
-      <input id="join-code-input" class="player-input" type="text" placeholder="Sessie-ID" style="text-transform:none"
+      <input id="join-code-input" class="player-input" type="text" placeholder="sessie-id"
         style="flex:1; text-align:center; font-size:1rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;"
-        oninput="this.value=this.value.toUpperCase()" />
-      <button class="btn" onclick="showJoinName()" style="width:auto; padding:0 1.2rem; white-space:nowrap;">Deelnemen</button>
-    </div>
-    <div id="join-name-row" style="display:none; margin-top:0.5rem;">
-      <input id="join-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%; margin-bottom:0.5rem;" />
-      <button class="btn" onclick="joinSession()">Doorgaan</button>
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter') showJoinName()" />
+      <button class="btn" onclick="showJoinName()" style="width:auto; padding:0 1.2rem; white-space:nowrap;">Doorgaan</button>
     </div>
     <div id="join-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; margin-top:0.5rem; min-height:1rem;"></div>
   </div>
@@ -659,30 +656,19 @@
 </div>
 
 
-<!-- JOIN SESSION -->
-<div id="screen-join" class="screen">
+
+<!-- JOIN NAME -->
+<div id="screen-join-name" class="screen">
   <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
-
-  <!-- Deelnemen -->
-  <div style="width:100%; background:var(--surface); border-radius:var(--radius); padding:1.2rem;">
-    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Deelnemen aan een spel</div>
-    <input id="join-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%; margin-bottom:0.5rem;" />
-    <input id="join-code-input" class="player-input" type="text" placeholder="Sessiecode (bijv. JOTT-1234)"
-      style="width:100%; text-align:center; font-size:1.1rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;"
-      oninput="this.value=this.value.toUpperCase()" />
-    <button class="btn" onclick="joinSession()" style="margin-top:0.75rem;">Doorgaan →</button>
-    <div id="join-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; margin-top:0.5rem; min-height:1rem;"></div>
+  <div style="text-align:center; width:100%;">
+    <div style="font-size:3rem; margin-bottom:0.5rem;">👋</div>
+    <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:0.5rem;">Wat is je naam?</h2>
+    <p style="font-size:0.85rem; color:var(--muted);">Je gaat deelnemen aan sessie <span id="join-code-display" style="color:var(--accent); font-weight:700;"></span></p>
   </div>
-
-  <!-- Maak een spel -->
-  <div style="width:100%; background:var(--surface); border-radius:var(--radius); padding:1.2rem;">
-    <div style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Maak een spel</div>
-    <div style="display:flex; flex-direction:column; gap:0.5rem;">
-      <button class="btn" onclick="showSubmenu('eten')">🍽️ Wat eten we?</button>
-      <button class="btn" onclick="showSubmenu('kijken')">🎬 Wat kijken we?</button>
-      <button class="btn" onclick="showScreen('screen-wheel')" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">🎡 Rad van fortuin</button>
-    </div>
-  </div>
+  <input id="join-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%;"
+    onkeydown="if(event.key==='Enter') joinSession()" />
+  <button class="btn" onclick="joinSession()">Deelnemen</button>
+  <div id="join-name-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; min-height:1rem;"></div>
 </div>
 
 <!-- SUBMENU ETEN -->
@@ -1603,24 +1589,25 @@ function leaveLobby() {
 // -- JOINER FLOW --
 
 function showJoinName() {
-  const code = document.getElementById('join-code-input').value.trim();
-  if (!code) { document.getElementById('join-error').textContent = 'Voer eerst een sessiecode in.'; return; }
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  if (!code) { document.getElementById('join-error').textContent = 'Voer eerst een sessie-ID in.'; return; }
   document.getElementById('join-error').textContent = '';
-  const row = document.getElementById('join-name-row');
-  row.style.display = 'block';
+  document.getElementById('join-code-display').textContent = code;
+  document.getElementById('join-name-input').value = '';
+  showScreen('screen-join-name');
 }
 
 async function joinSession() {
   const code = document.getElementById('join-code-input').value.trim().toUpperCase();
   const name = document.getElementById('join-name-input').value.trim() || 'Gast';
-  const errEl = document.getElementById('join-error');
+  const errEl = document.getElementById('join-name-error');
   errEl.textContent = '';
 
-  if (!code || code.length < 4) { errEl.textContent = 'Voer een geldige code in.'; return; }
+  if (!code || code.length < 4) { errEl.textContent = 'Sessie-ID niet gevonden.'; return; }
 
   try {
     const rows = await sbFetch('sessions?id=eq.' + code + '&select=*');
-    if (!rows || rows.length === 0) { errEl.textContent = 'Code niet gevonden.'; return; }
+    if (!rows || rows.length === 0) { errEl.textContent = 'Sessie-ID niet gevonden. Controleer de code.'; return; }
 
     const session = rows[0];
     sessionId = code;
@@ -1637,7 +1624,7 @@ async function joinSession() {
     showScreen('screen-waiting');
     pollForStart(code, name);
   } catch(e) {
-    errEl.textContent = 'Er ging iets mis. Probeer opnieuw.';
+    errEl.textContent = 'Er ging iets mis. Probeer opnieuw.'; 
   }
 }
 
