@@ -1466,12 +1466,18 @@ async function sbFetch(path, method, body) {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
       'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : ''
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=representation'
     },
     body: body ? JSON.stringify(body) : undefined
   });
-  if (!res.ok) { const t = await res.text(); throw new Error(t); }
-  return method === 'DELETE' ? null : res.json();
+  if (!res.ok) {
+    const t = await res.text();
+    console.error('sbFetch error', method, path, t);
+    throw new Error(t);
+  }
+  const text = await res.text();
+  if (!text) return null;
+  try { return JSON.parse(text); } catch(e) { return null; }
 }
 
 function generateCode() {
@@ -1569,8 +1575,16 @@ function renderLobbyPlayers(players, readyList) {
 
 async function hostStartGame() {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
-  await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { started: true });
-  // Host plays as first player
+  try {
+    // Save cards freshly so joiners get the correct shuffled deck
+    await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', {
+      started: true,
+      cards: currentCards
+    });
+  } catch(e) {
+    alert('Kon sessie niet starten. Probeer opnieuw.');
+    return;
+  }
   playerNames = [myPlayerName];
   currentCardIndex = 0;
   currentPlayer = 0;
@@ -1627,7 +1641,8 @@ async function joinSession() {
     showScreen('screen-waiting');
     pollForStart(code, name);
   } catch(e) {
-    errEl.textContent = 'Er ging iets mis. Probeer opnieuw.'; 
+    console.error('joinSession error:', e);
+    errEl.textContent = 'Fout: ' + (e.message || 'onbekend. Zie console.');
   }
 }
 
@@ -1656,16 +1671,18 @@ async function updateReadyInSession() {
 
 function pollForStart(code, name) {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
-  document.getElementById('waiting-code').textContent = code;
+  const waitCodeEl = document.getElementById('waiting-code');
+  if (waitCodeEl) waitCodeEl.textContent = code;
   myReadyState = false;
-  sessionPollInterval = setInterval(async () => {
+
+  async function checkSession() {
     try {
       const rows = await sbFetch('sessions?id=eq.' + code + '&select=started,players,cards,ready_list');
       if (!rows || !rows[0]) return;
       const session = rows[0];
       renderLobbyPlayers(session.players || [], session.ready_list || []);
 
-      if (session.started) {
+      if (session.started === true) {
         clearInterval(sessionPollInterval);
         currentCards = session.cards;
         playerNames = [name];
@@ -1675,14 +1692,19 @@ function pollForStart(code, name) {
         showScreen('screen-swipe');
         updateSwipeUI();
       }
-    } catch(e) {}
-  }, 2000);
+    } catch(e) {
+      console.error('Poll error:', e);
+    }
+  }
+
+  checkSession();
+  sessionPollInterval = setInterval(checkSession, 1500);
 }
 
 function leaveSession() {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
   sessionId = null;
-  showScreen('screen-join');
+  showScreen('screen-home');
 }
 
 // -- SUBMIT VOTES --
