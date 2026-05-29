@@ -1588,17 +1588,20 @@ function leaveLobby() {
 
 // -- JOINER FLOW --
 
+let pendingJoinCode = '';
+
 function showJoinName() {
   const code = document.getElementById('join-code-input').value.trim().toUpperCase();
   if (!code) { document.getElementById('join-error').textContent = 'Voer eerst een sessie-ID in.'; return; }
   document.getElementById('join-error').textContent = '';
+  pendingJoinCode = code;
   document.getElementById('join-code-display').textContent = code;
   document.getElementById('join-name-input').value = '';
   showScreen('screen-join-name');
 }
 
 async function joinSession() {
-  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  const code = pendingJoinCode || document.getElementById('join-code-input').value.trim().toUpperCase();
   const name = document.getElementById('join-name-input').value.trim() || 'Gast';
   const errEl = document.getElementById('join-name-error');
   errEl.textContent = '';
