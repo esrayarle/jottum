@@ -176,6 +176,7 @@
   }
 
   .player-input:focus { border-color: var(--accent); }
+  .player-input::placeholder { color: #555; }
 
   .btn {
     background: var(--accent);
@@ -235,6 +236,7 @@
     padding: 2rem;
     cursor: grab;
     user-select: none;
+    touch-action: none;
     transition: transform 0.08s ease;
     border: 1.5px solid #2a2a35;
   }
@@ -468,6 +470,54 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  .add-player-btn {
+    background: none;
+    border: 1.5px dashed #444;
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .add-player-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .remove-player-btn {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.3rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .remove-player-btn:hover { color: var(--accent2); }
+
+  /* Screen transitions */
+  .screen.active {
+    animation: screenIn 0.22s ease;
+  }
+
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+  }
+
   .slot-window {
     width: 68px;
     height: 76px;
@@ -493,6 +543,15 @@
 </style>
 </head>
 <body>
+
+<canvas id="confetti-canvas"></canvas>
+<div id="pwa-banner" style="display:none; background:var(--surface); border-bottom:1px solid #333; padding:0.75rem 1.5rem; align-items:center; justify-content:space-between; gap:1rem; width:100%;">
+  <span style="font-size:0.85rem; color:var(--text);">📲 Voeg Jottum! toe aan je beginscherm</span>
+  <div style="display:flex; gap:0.5rem;">
+    <button onclick="installPWA()" style="background:var(--accent); color:#fff; border:none; border-radius:8px; padding:0.4rem 0.9rem; font-family:var(--font); font-weight:700; font-size:0.82rem; cursor:pointer;">Installeer</button>
+    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:none; border:none; color:var(--muted); font-size:1.2rem; cursor:pointer;">×</button>
+  </div>
+</div>
 
 <div class="header">
   <img class="logo-img" src="logo.png" alt="Jottum!">
@@ -561,17 +620,11 @@
   <button class="back-btn" id="players-back-btn" onclick="playersBack()">← terug</button>
   <div class="player-setup">
     <h2>Wie spelen er mee?</h2>
-    <div class="player-row">
-      <div class="player-avatar p1">1</div>
-      <input class="player-input" id="player1-name" type="text" placeholder="Speler 1" value="Speler 1" />
-    </div>
-    <div class="player-row">
-      <div class="player-avatar p2">2</div>
-      <input class="player-input" id="player2-name" type="text" placeholder="Speler 2" value="Speler 2" />
-    </div>
+    <div id="player-rows"></div>
+    <button class="add-player-btn" onclick="addPlayerRow()" id="add-player-btn">+ Speler toevoegen</button>
   </div>
   <button class="btn" onclick="startSwipe()">Starten →</button>
-  <button class="btn secondary" onclick="startWildcard()">🎲 Wildcard</button>
+  <button class="btn secondary" onclick="startWildcard()" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">🎲 Wildcard</button>
 </div>
 
 <!-- SWIPE -->
@@ -760,8 +813,39 @@ let currentGame = null;
 let currentCards = [];
 let currentCardIndex = 0;
 let currentPlayer = 0;
-let playerNames = ['Speler 1', 'Speler 2'];
-let votes = [[], []];
+let playerNames = [];
+let votes = [];
+const AVATAR_COLORS = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8'];
+
+function renderPlayerRows() {
+  const container = document.getElementById('player-rows');
+  container.innerHTML = '';
+  playerNames.forEach((name, i) => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.innerHTML =
+      '<div class="player-avatar" style="background:' + AVATAR_COLORS[i % AVATAR_COLORS.length] + '; color:#fff; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; flex-shrink:0;">' + (i + 1) + '</div>' +
+      '<input class="player-input" data-index="' + i + '" type="text" placeholder="Speler ' + (i + 1) + '" value="' + name + '" oninput="playerNames[' + i + ']=this.value" />' +
+      (i >= 2 ? '<button class="remove-player-btn" onclick="removePlayer(' + i + ')">×</button>' : '');
+    container.appendChild(row);
+  });
+  document.getElementById('add-player-btn').style.display = playerNames.length >= 6 ? 'none' : 'block';
+}
+
+function addPlayerRow() {
+  playerNames.push('');
+  renderPlayerRows();
+}
+
+function removePlayer(i) {
+  playerNames.splice(i, 1);
+  renderPlayerRows();
+}
+
+function initPlayers() {
+  if (playerNames.length === 0) playerNames = ['', ''];
+  renderPlayerRows();
+}
 let isDragging = false;
 let startX = 0;
 let currentX = 0;
@@ -779,6 +863,7 @@ function showSubmenu(type) {
 
 function startGame(game) {
   currentGame = game;
+  initPlayers();
   showScreen('screen-players');
 }
 
@@ -794,12 +879,15 @@ function confirmBack() {
 }
 
 function startSwipe() {
-  playerNames[0] = document.getElementById('player1-name').value || 'Speler 1';
-  playerNames[1] = document.getElementById('player2-name').value || 'Speler 2';
+  // Read current input values
+  document.querySelectorAll('.player-input[data-index]').forEach(input => {
+    const i = parseInt(input.dataset.index);
+    playerNames[i] = input.value.trim() || ('Speler ' + (i + 1));
+  });
   currentCards = [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5);
   currentCardIndex = 0;
   currentPlayer = 0;
-  votes = [Array(currentCards.length).fill(null), Array(currentCards.length).fill(null)];
+  votes = playerNames.map(() => Array(currentCards.length).fill(null));
   showScreen('screen-swipe');
   updateSwipeUI();
 }
@@ -811,7 +899,7 @@ function updateSwipeUI() {
   document.getElementById('card-sub').textContent = c.sub;
   document.getElementById('progress-text').textContent = (currentCardIndex + 1) + ' / ' + currentCards.length;
   document.getElementById('current-player-name').textContent = playerNames[currentPlayer];
-  document.getElementById('player-dot').style.background = currentPlayer === 0 ? 'var(--accent)' : 'var(--accent2)';
+  document.getElementById('player-dot').style.background = AVATAR_COLORS[currentPlayer % AVATAR_COLORS.length];
   document.getElementById('turn-name').textContent = playerNames[currentPlayer] + ' is aan de beurt';
   document.getElementById('label-yes').style.opacity = 0;
   document.getElementById('label-no').style.opacity = 0;
@@ -839,12 +927,12 @@ function animateCard(yes) {
 function nextCard() {
   currentCardIndex++;
   if (currentCardIndex >= currentCards.length) {
-    if (currentPlayer === 0) {
-      currentPlayer = 1;
+    if (currentPlayer < playerNames.length - 1) {
+      currentPlayer++;
       currentCardIndex = 0;
-      document.getElementById('handoff-title').textContent = playerNames[0] + ' is klaar!';
-      document.getElementById('handoff-sub').textContent = 'Geef het scherm door aan ' + playerNames[1];
-      document.getElementById('handoff-btn').textContent = playerNames[1] + ' is er klaar voor →';
+      document.getElementById('handoff-title').textContent = playerNames[currentPlayer - 1] + ' is klaar!';
+      document.getElementById('handoff-sub').textContent = 'Geef het scherm door aan ' + playerNames[currentPlayer];
+      document.getElementById('handoff-btn').textContent = playerNames[currentPlayer] + ' is er klaar voor →';
       showScreen('screen-handoff');
     } else {
       showResult();
@@ -864,15 +952,18 @@ function showResult() {
   const partial = [];
 
   currentCards.forEach((c, i) => {
-    const v1 = votes[0][i];
-    const v2 = votes[1][i];
-    if (v1 && v2) matches.push({ card: c, v1, v2 });
-    else if (v1 || v2) partial.push({ card: c, v1, v2 });
+    const playerVotes = playerNames.map((_, p) => votes[p][i]);
+    const allYes = playerVotes.every(v => v === true);
+    const anyYes = playerVotes.some(v => v === true);
+    if (allYes) matches.push({ card: c, playerVotes });
+    else if (anyYes) partial.push({ card: c, playerVotes });
   });
 
   const winner = matches.length > 0
     ? matches[Math.floor(Math.random() * matches.length)].card
     : partial.length > 0 ? partial[0].card : null;
+
+  if (matches.length > 0) launchConfetti();
 
   document.getElementById('result-subtitle').textContent =
     matches.length > 0 ? '🎉 Jullie zijn het eens over:' : '😅 Geen volledige match, beste optie:';
@@ -1015,6 +1106,68 @@ function spinSlots() {
   }, totalTime + 200);
 }
 
+
+// CONFETTI
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('pwa-banner').style.display = 'none';
+    });
+  }
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = [];
+  const colors = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#f5c842','#38bdf8'];
+  for (let i = 0; i < 120; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 200,
+      w: 8 + Math.random() * 8,
+      h: 4 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI * 2,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 2 + Math.random() * 4,
+      vr: (Math.random() - 0.5) * 0.2,
+    });
+  }
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.vy += 0.05;
+    });
+    frame++;
+    if (frame < 180) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// PWA install prompt
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('pwa-banner');
+  if (banner) banner.style.display = 'flex';
+});
 
 // WHEEL
 let wheelOptions = ['Pizza', 'Sushi', 'Pasta', 'Burger', 'Mexicaans'];
