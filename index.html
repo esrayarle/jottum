@@ -806,7 +806,8 @@
   <button class="back-btn" id="modus-back-btn" onclick="modusBack()">← terug</button>
   <div class="screen-title">Hoe willen jullie spelen?</div>
   <div style="width:100%;">
-    <input id="host-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%;" />
+    <input id="host-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%;" oninput="document.getElementById('host-name-error').style.display='none'" />
+    <div id="host-name-error" style="display:none; color:var(--accent2); font-size:0.82rem; margin-top:0.4rem; padding-left:0.2rem;">Vul een naam in om door te gaan</div>
   </div>
   <div class="submenu-grid">
     <div class="submenu-card" onclick="chooseModus('multi')">
@@ -1324,16 +1325,26 @@ function modusBack() {
 }
 
 function chooseModus(modus) {
+  const hostInput = document.getElementById('host-name-input');
+  const nameError = document.getElementById('host-name-error');
+  const name = hostInput ? hostInput.value.trim() : '';
+
+  if (!name) {
+    if (nameError) { nameError.textContent = 'Vul een naam in om door te gaan'; nameError.style.display = 'block'; }
+    if (hostInput) hostInput.focus();
+    return;
+  }
+
+  if (nameError) nameError.style.display = 'none';
   currentModus = modus;
   sessionId = null;
   isHost = false;
-  const hostInput = document.getElementById('host-name-input');
-  myPlayerName = (hostInput && hostInput.value.trim()) || 'Host';
+  myPlayerName = name;
+
   if (modus === 'multi') {
     initPlayers();
     goToLobby();
   } else {
-    // Pre-fill first player name from host input
     if (playerNames.length === 0) playerNames = ['', ''];
     playerNames[0] = myPlayerName;
     initPlayers();
