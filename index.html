@@ -486,6 +486,9 @@
     align-self: flex-start;
   }
 
+  .mobile-only { display: none; }
+  @media (hover: none) and (pointer: coarse) { .mobile-only { display: block; } }
+
   .transition-fade { animation: fadeIn 0.25s ease; }
 
   @keyframes fadeIn {
@@ -717,6 +720,11 @@
         <div class="icon">🎲</div>
         <h3>Dobbelstenen</h3>
         <p>Gooi 1 tot 6 dobbelstenen</p>
+      </div>
+      <div class="home-card mobile-only" style="grid-column: 1 / -1;" onclick="showScreen('screen-finger')">
+        <div class="icon">👆</div>
+        <h3>Hou je vinger vast</h3>
+        <p>Leg vingers op het scherm, één verliest</p>
       </div>
     </div>
   </div>
@@ -954,6 +962,22 @@
       <div id="results-waiting-list" style="display:flex; flex-direction:column; gap:0.4rem;"></div>
     </div>
   </div>
+</div>
+
+<!-- FINGER GAME -->
+<div id="screen-finger" class="screen">
+  <button class="back-btn" onclick="stopFingerGame(); showScreen('screen-home')">← terug naar overzicht</button>
+  <div style="text-align:center; width:100%;">
+    <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:0.5rem;">Hou je vinger vast</h2>
+    <p id="finger-instruction" style="font-size:0.9rem; color:var(--muted);">Leg alle vingers tegelijk op het vlak</p>
+  </div>
+  <div id="finger-arena" style="width:100%; height:420px; background:var(--surface); border-radius:24px; border:2px solid #2a2a35; position:relative; touch-action:none; overflow:hidden; user-select:none;">
+    <div id="finger-ready-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;pointer-events:none;">
+      <div style="font-size:3rem;">👆</div>
+      <div style="font-size:0.9rem;color:var(--muted);">Leg vingers op het vlak</div>
+    </div>
+  </div>
+  <div id="finger-result" style="font-size:1.3rem; font-weight:700; text-align:center; min-height:2rem; color:var(--accent);"></div>
 </div>
 
 <!-- DICE -->
@@ -1218,6 +1242,8 @@ function showScreen(id) {
     document.getElementById('dice-total').textContent = '';
     document.getElementById('dice-display').innerHTML = makeDiceCube(1);
   }
+  if (id === 'screen-finger') initFingerGame();
+  else stopFingerGame();
 }
 
 function showSubmenu(type) {
@@ -2344,6 +2370,157 @@ function endSession() {
 }
 
 const STREAMING_LINKS = {"The Lion King": "https://www.disneyplus.com", "Shrek": "https://www.netflix.com/search?q=Shrek", "Frozen": "https://www.disneyplus.com", "Moana": "https://www.disneyplus.com", "Kung Fu Panda": "https://www.netflix.com/search?q=Kung+Fu+Panda", "Encanto": "https://www.disneyplus.com", "Tangled": "https://www.disneyplus.com", "How to Train Your Dragon": "https://www.netflix.com/search?q=How+to+Train+Your+Dragon", "The Grand Budapest Hotel": "https://www.netflix.com/search?q=Grand+Budapest+Hotel", "Superbad": "https://www.netflix.com/search?q=Superbad", "Game Night": "https://www.netflix.com/search?q=Game+Night", "Knives Out": "https://www.netflix.com/search?q=Knives+Out", "Parasite": "https://www.netflix.com/search?q=Parasite", "Gone Girl": "https://www.netflix.com/search?q=Gone+Girl", "Oldboy": "https://www.netflix.com/search?q=Oldboy", "Prisoners": "https://www.netflix.com/search?q=Prisoners", "Mad Max: Fury Road": "https://www.netflix.com/search?q=Mad+Max", "John Wick": "https://www.netflix.com/search?q=John+Wick", "Mission Impossible": "https://www.netflix.com/search?q=Mission+Impossible", "The Dark Knight": "https://www.netflix.com/search?q=Dark+Knight", "La La Land": "https://www.netflix.com/search?q=La+La+Land", "About Time": "https://www.netflix.com/search?q=About+Time", "The Notebook": "https://www.netflix.com/search?q=The+Notebook", "Crazy Rich Asians": "https://www.netflix.com/search?q=Crazy+Rich+Asians", "Interstellar": "https://www.netflix.com/search?q=Interstellar", "Arrival": "https://www.netflix.com/search?q=Arrival", "Ex Machina": "https://www.netflix.com/search?q=Ex+Machina", "Everything Everywhere All At Once": "https://www.netflix.com/search?q=Everything+Everywhere", "The Prestige": "https://www.netflix.com/search?q=The+Prestige", "Memento": "https://www.netflix.com/search?q=Memento", "Shutter Island": "https://www.netflix.com/search?q=Shutter+Island", "Hereditary": "https://www.netflix.com/search?q=Hereditary", "Get Out": "https://www.netflix.com/search?q=Get+Out", "A Quiet Place": "https://www.netflix.com/search?q=A+Quiet+Place", "The Conjuring": "https://www.netflix.com/search?q=The+Conjuring", "Free Solo": "https://www.disneyplus.com", "Making a Murderer": "https://www.netflix.com/search?q=Making+a+Murderer", "The Social Dilemma": "https://www.netflix.com/search?q=Social+Dilemma", "Icarus": "https://www.netflix.com/search?q=Icarus", "The Shawshank Redemption": "https://www.netflix.com/search?q=Shawshank", "Whiplash": "https://www.netflix.com/search?q=Whiplash", "1917": "https://www.netflix.com/search?q=1917", "Zodiac": "https://www.netflix.com/search?q=Zodiac", "Se7en": "https://www.netflix.com/search?q=Se7en", "Heat": "https://www.netflix.com/search?q=Heat", "The Departed": "https://www.netflix.com/search?q=The+Departed", "Avengers: Endgame": "https://www.disneyplus.com", "Spider-Man: No Way Home": "https://www.netflix.com/search?q=Spider-Man+No+Way+Home", "Thor: Ragnarok": "https://www.disneyplus.com", "Schitts Creek": "https://www.netflix.com/search?q=Schitts+Creek", "Abbott Elementary": "https://www.netflix.com/search?q=Abbott+Elementary", "What We Do in the Shadows": "https://www.netflix.com/search?q=What+We+Do+in+the+Shadows", "Arrested Development": "https://www.netflix.com/search?q=Arrested+Development", "Ozark": "https://www.netflix.com/search?q=Ozark", "Succession": "https://www.hbomax.com", "The Night Of": "https://www.hbomax.com", "Severance": "https://tv.apple.com", "True Detective": "https://www.hbomax.com", "Mindhunter": "https://www.netflix.com/search?q=Mindhunter", "The Wire": "https://www.hbomax.com", "Breaking Bad": "https://www.netflix.com/search?q=Breaking+Bad", "The Bear": "https://www.disneyplus.com", "Normal People": "https://www.hulu.com", "This Is Us": "https://www.netflix.com/search?q=This+Is+Us", "Black Mirror": "https://www.netflix.com/search?q=Black+Mirror", "Dark": "https://www.netflix.com/search?q=Dark", "Westworld": "https://www.hbomax.com", "Twin Peaks": "https://www.netflix.com/search?q=Twin+Peaks", "The Haunting of Hill House": "https://www.netflix.com/search?q=Haunting+of+Hill+House", "Broadchurch": "https://www.netflix.com/search?q=Broadchurch", "Midnight Mass": "https://www.netflix.com/search?q=Midnight+Mass", "Stranger Things": "https://www.netflix.com/search?q=Stranger+Things", "American Horror Story": "https://www.netflix.com/search?q=American+Horror+Story", "Bridgerton": "https://www.netflix.com/search?q=Bridgerton", "You": "https://www.netflix.com/search?q=You", "Emily in Paris": "https://www.netflix.com/search?q=Emily+in+Paris", "The Last Dance": "https://www.netflix.com/search?q=The+Last+Dance", "Tiger King": "https://www.netflix.com/search?q=Tiger+King", "Wild Wild Country": "https://www.netflix.com/search?q=Wild+Wild+Country", "Arcane": "https://www.netflix.com/search?q=Arcane", "Bojack Horseman": "https://www.netflix.com/search?q=Bojack+Horseman", "Rick and Morty": "https://www.netflix.com/search?q=Rick+and+Morty", "The Circle": "https://www.netflix.com/search?q=The+Circle", "Love is Blind": "https://www.netflix.com/search?q=Love+is+Blind", "Squid Game: The Challenge": "https://www.netflix.com/search?q=Squid+Game+Challenge", "Survivor": "https://www.netflix.com/search?q=Survivor", "Chernobyl": "https://www.hbomax.com", "Mare of Easttown": "https://www.hbomax.com", "Band of Brothers": "https://www.hbomax.com"};
+
+// FINGER GAME
+let fingerTouches = {};
+let fingerEliminating = false;
+let fingerGameActive = false;
+let fingerCountdownTimer = null;
+const FINGER_COLORS = ['#ff6b1a','#ff6b6b','#6bffc8','#a78bfa','#fb923c','#38bdf8','#f472b6','#4ade80','#fbbf24','#60a5fa'];
+
+function stopFingerGame() {
+  fingerGameActive = false;
+  fingerEliminating = false;
+  fingerTouches = {};
+  if (fingerCountdownTimer) clearTimeout(fingerCountdownTimer);
+  const arena = document.getElementById('finger-arena');
+  if (arena) {
+    arena.removeEventListener('touchstart', fingerTouchStart);
+    arena.removeEventListener('touchend', fingerTouchEnd);
+    arena.removeEventListener('touchcancel', fingerTouchEnd);
+  }
+}
+
+function initFingerGame() {
+  fingerTouches = {};
+  fingerEliminating = false;
+  fingerGameActive = true;
+  document.getElementById('finger-result').textContent = '';
+  document.getElementById('finger-instruction').textContent = 'Leg alle vingers tegelijk op het vlak';
+  const overlay = document.getElementById('finger-ready-overlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  const arena = document.getElementById('finger-arena');
+  arena.innerHTML = '<div id="finger-ready-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;pointer-events:none;"><div style="font-size:3rem;">👆</div><div style="font-size:0.9rem;color:var(--muted);">Leg vingers op het vlak</div></div>';
+
+  arena.addEventListener('touchstart', fingerTouchStart, { passive: false });
+  arena.addEventListener('touchend', fingerTouchEnd, { passive: false });
+  arena.addEventListener('touchcancel', fingerTouchEnd, { passive: false });
+}
+
+function fingerTouchStart(e) {
+  e.preventDefault();
+  if (fingerEliminating) return;
+
+  const arena = document.getElementById('finger-arena');
+  const rect = arena.getBoundingClientRect();
+  const overlay = document.getElementById('finger-ready-overlay');
+  if (overlay) overlay.style.display = 'none';
+
+  for (const touch of e.changedTouches) {
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const colorIdx = Object.keys(fingerTouches).length % FINGER_COLORS.length;
+    fingerTouches[touch.identifier] = { x, y, color: FINGER_COLORS[colorIdx], alive: true };
+
+    const dot = document.createElement('div');
+    dot.id = 'finger-dot-' + touch.identifier;
+    dot.style.cssText = 'position:absolute;width:72px;height:72px;border-radius:50%;background:' + FINGER_COLORS[colorIdx] + ';transform:translate(-50%,-50%);left:' + x + 'px;top:' + y + 'px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#000;box-shadow:0 0 20px ' + FINGER_COLORS[colorIdx] + '88;transition:transform 0.2s,opacity 0.3s;';
+    arena.appendChild(dot);
+  }
+
+  updateFingerCount();
+
+  if (fingerCountdownTimer) clearTimeout(fingerCountdownTimer);
+  if (Object.keys(fingerTouches).length >= 2) {
+    document.getElementById('finger-instruction').textContent = 'Houd vast...';
+    fingerCountdownTimer = setTimeout(() => startElimination(), 1500);
+  }
+}
+
+function fingerTouchEnd(e) {
+  e.preventDefault();
+  if (fingerEliminating) return;
+  if (fingerCountdownTimer) clearTimeout(fingerCountdownTimer);
+
+  for (const touch of e.changedTouches) {
+    delete fingerTouches[touch.identifier];
+    const dot = document.getElementById('finger-dot-' + touch.identifier);
+    if (dot) dot.remove();
+  }
+
+  updateFingerCount();
+  if (Object.keys(fingerTouches).length < 2) {
+    document.getElementById('finger-instruction').textContent = 'Leg alle vingers tegelijk op het vlak';
+  }
+}
+
+function updateFingerCount() {
+  const count = Object.keys(fingerTouches).length;
+  if (count > 0) {
+    document.getElementById('finger-instruction').textContent = count === 1 ? '1 vinger — wacht op meer' : count + ' vingers — houd vast...';
+  }
+}
+
+function startElimination() {
+  fingerEliminating = true;
+  const ids = Object.keys(fingerTouches);
+  if (ids.length < 2) { fingerEliminating = false; return; }
+
+  document.getElementById('finger-instruction').textContent = '🎲 Elimineren...';
+
+  // Eliminate one by one until 1 remains
+  const toEliminate = [...ids];
+  // Shuffle
+  for (let i = toEliminate.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [toEliminate[i], toEliminate[j]] = [toEliminate[j], toEliminate[i]];
+  }
+  // Keep last one as loser (stays on screen)
+  const loserIdx = toEliminate[toEliminate.length - 1];
+  const eliminateOrder = toEliminate.slice(0, toEliminate.length - 1);
+
+  let delay = 400;
+  eliminateOrder.forEach((id, i) => {
+    setTimeout(() => {
+      playTick();
+      const dot = document.getElementById('finger-dot-' + id);
+      if (dot) {
+        dot.style.transform = 'translate(-50%,-50%) scale(1.3)';
+        setTimeout(() => {
+          dot.style.opacity = '0';
+          dot.style.transform = 'translate(-50%,-50%) scale(0)';
+          setTimeout(() => dot.remove(), 300);
+        }, 150);
+      }
+    }, delay + i * 500);
+  });
+
+  const totalDelay = delay + eliminateOrder.length * 500 + 600;
+  setTimeout(() => {
+    // Highlight loser
+    const loserDot = document.getElementById('finger-dot-' + loserIdx);
+    if (loserDot) {
+      loserDot.style.transform = 'translate(-50%,-50%) scale(1.4)';
+      loserDot.style.boxShadow = '0 0 40px #ff6b6b';
+      loserDot.style.background = '#ff6b6b';
+      loserDot.textContent = '😬';
+      loserDot.style.fontSize = '2rem';
+    }
+    playResult();
+    document.getElementById('finger-result').textContent = '😬 Deze vinger verliest!';
+    document.getElementById('finger-instruction').textContent = 'Til je vinger op om opnieuw te spelen';
+
+    // Reset after lifting
+    setTimeout(() => {
+      fingerEliminating = false;
+      fingerTouches = {};
+    }, 500);
+  }, totalDelay);
+}
+
+// Init finger game when screen shown
+const origShowScreen = showScreen;
 
 // DICE
 let diceCount = 1;
