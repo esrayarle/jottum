@@ -2615,8 +2615,34 @@ const origShowScreen = showScreen;
 
 // TMDB
 const TMDB_KEY = "64585f049a021773694501b7b9e6fc1b";
-const TMDB_MOVIE_GENRES = {"Comedy": 35, "Thriller": 53, "Actie": 28, "Romantiek": 10749, "Sci-Fi": 878, "Mystery": 9648, "Horror": 27, "Animatie": 16, "Documentaire": 99, "Drama": 18, "Crime": 80, "Superhelden": 28};
-const TMDB_TV_GENRES = {"Comedy": 35, "Thriller": 9648, "Crime": 80, "Drama": 18, "Sci-Fi": 10765, "Mystery": 9648, "Horror": 9648, "Romantiek": 10749, "Documentaire": 99, "Animatie": 16, "Reality": 10764, "Miniserie": 18};
+const TMDB_MOVIE_GENRES = {
+  "Comedy":      { genre: 35,    exclude: "16" },
+  "Thriller":    { genre: 53,    exclude: "16,35" },
+  "Actie":       { genre: 28,    exclude: "16" },
+  "Romantiek":   { genre: 10749, exclude: "16" },
+  "Sci-Fi":      { genre: 878,   exclude: "16" },
+  "Mystery":     { genre: 9648,  exclude: "16" },
+  "Horror":      { genre: 27,    exclude: "16,35" },
+  "Animatie":    { genre: 16 },
+  "Documentaire":{ genre: 99 },
+  "Drama":       { genre: 18,    exclude: "16,35,28" },
+  "Crime":       { genre: 80,    exclude: "16,35" },
+  "Superhelden": { genre: 28,    exclude: "16", keywords: "superhero" },
+};
+const TMDB_TV_GENRES = {
+  "Comedy":      { genre: 35,    exclude: "16" },
+  "Thriller":    { genre: 80,    exclude: "16,35", extra: "&with_keywords=thriller" },
+  "Crime":       { genre: 80,    exclude: "16,35" },
+  "Drama":       { genre: 18,    exclude: "16,35" },
+  "Sci-Fi":      { genre: 10765, exclude: "16" },
+  "Mystery":     { genre: 9648,  exclude: "16,35" },
+  "Horror":      { genre: 9648,  exclude: "16,35", extra: "&with_keywords=horror" },
+  "Romantiek":   { genre: 10749, exclude: "16" },
+  "Documentaire":{ genre: 99 },
+  "Animatie":    { genre: 16 },
+  "Reality":     { genre: 10764 },
+  "Miniserie":   { genre: 18,    exclude: "16", extra: "&with_type=4" },
+};
 
 const PLATFORM_NAMES = {
   8: { name: 'Netflix', color: '#E50914' },
@@ -2637,16 +2663,20 @@ async function fetchTMDBFilms(genreTitle) {
   const isTV = currentGame === 'serie';
   isTVMode = isTV;
   const genres = isTV ? TMDB_TV_GENRES : TMDB_MOVIE_GENRES;
-  const genreId = genres[genreTitle];
-  if (!genreId) return [];
+  const genreObj = genres[genreTitle];
+  if (!genreObj) return [];
 
   const type = isTV ? 'tv' : 'movie';
+  const extra = genreObj.extra || '';
+  const keywords = genreObj.keywords ? '&with_keywords=' + genreObj.keywords : '';
+  const exclude = genreObj.exclude ? '&without_genres=' + genreObj.exclude : '';
   const url = 'https://api.themoviedb.org/3/discover/' + type +
     '?api_key=' + TMDB_KEY +
-    '&with_genres=' + genreId +
+    '&with_genres=' + genreObj.genre +
     '&sort_by=popularity.desc' +
     '&vote_count.gte=100' +
     '&language=nl-NL' +
+    keywords + exclude + extra +
     '&page=' + (Math.floor(Math.random() * 3) + 1);
 
   try {
