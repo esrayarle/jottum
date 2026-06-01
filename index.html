@@ -805,22 +805,32 @@
 <div id="screen-modus" class="screen">
   <button class="back-btn" id="modus-back-btn" onclick="modusBack()">← terug</button>
   <div class="screen-title">Hoe willen jullie spelen?</div>
-  <div style="width:100%;">
-    <input id="host-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%;" oninput="document.getElementById('host-name-error').style.display='none'" />
-    <div id="host-name-error" style="display:none; color:var(--accent2); font-size:0.82rem; margin-top:0.4rem; padding-left:0.2rem;">Vul een naam in om door te gaan</div>
-  </div>
   <div class="submenu-grid">
-    <div class="submenu-card" onclick="chooseModus('multi')">
+    <div class="submenu-card" onclick="pickModus('multi')">
       <div class="icon">👥</div>
       <h3>Meerdere telefoons</h3>
       <p>Iedereen swiped mee</p>
     </div>
-    <div class="submenu-card" onclick="chooseModus('solo')">
+    <div class="submenu-card" onclick="pickModus('solo')">
       <div class="icon">📱</div>
       <h3>Eén telefoon</h3>
       <p>Om de beurt swipen</p>
     </div>
   </div>
+</div>
+
+<!-- NAAM INVOER: na modus keuze -->
+<div id="screen-name" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-modus')">← terug</button>
+  <div style="text-align:center; width:100%;">
+    <div style="font-size:3rem; margin-bottom:0.5rem;" id="name-screen-icon">👥</div>
+    <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:0.5rem;">Wat is jouw naam?</h2>
+  </div>
+  <input id="host-name-input" class="player-input" type="text" placeholder="Jouw naam" style="width:100%;"
+    oninput="document.getElementById('host-name-error').style.display='none'"
+    onkeydown="if(event.key==='Enter') chooseModus(window.pendingModus)" />
+  <div id="host-name-error" style="display:none; color:var(--accent2); font-size:0.82rem; margin-top:0.25rem;">Vul een naam in om door te gaan</div>
+  <button class="btn" onclick="chooseModus(window.pendingModus)">Doorgaan</button>
 </div>
 
 <!-- PLAYER SETUP (lokaal, geen sessie) -->
@@ -1282,9 +1292,10 @@ function renderPlayerRows() {
   playerNames.forEach((name, i) => {
     const row = document.createElement('div');
     row.className = 'player-row';
+    const displayVal = name && name !== ('Speler ' + (i + 1)) ? name : '';
     row.innerHTML =
       '<div class="player-avatar" style="background:' + AVATAR_COLORS[i % AVATAR_COLORS.length] + '; color:#fff; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; flex-shrink:0;">' + (i + 1) + '</div>' +
-      '<input class="player-input" data-index="' + i + '" type="text" placeholder="Speler ' + (i + 1) + '" value="' + name + '" oninput="playerNames[' + i + ']=this.value" />' +
+      '<input class="player-input" data-index="' + i + '" type="text" placeholder="Speler ' + (i + 1) + '" value="' + displayVal + '" oninput="playerNames[' + i + ']=this.value" />' +
       (i >= 2 ? '<button class="remove-player-btn" onclick="removePlayer(' + i + ')">×</button>' : '');
     container.appendChild(row);
   });
@@ -1335,13 +1346,21 @@ function modusBack() {
   showScreen(parent || 'screen-home');
 }
 
+function pickModus(modus) {
+  window.pendingModus = modus;
+  document.getElementById('name-screen-icon').textContent = modus === 'multi' ? '👥' : '📱';
+  document.getElementById('host-name-input').value = '';
+  document.getElementById('host-name-error').style.display = 'none';
+  showScreen('screen-name');
+}
+
 function chooseModus(modus) {
   const hostInput = document.getElementById('host-name-input');
   const nameError = document.getElementById('host-name-error');
   const name = hostInput ? hostInput.value.trim() : '';
 
   if (!name) {
-    if (nameError) { nameError.textContent = 'Vul een naam in om door te gaan'; nameError.style.display = 'block'; }
+    if (nameError) { nameError.style.display = 'block'; }
     if (hostInput) hostInput.focus();
     return;
   }
@@ -2670,19 +2689,26 @@ async function fetchTMDBFilms(genreTitle) {
   const extra = genreObj.extra || '';
   const keywords = genreObj.keywords ? '&with_keywords=' + genreObj.keywords : '';
   const exclude = genreObj.exclude ? '&without_genres=' + genreObj.exclude : '';
-  const url = 'https://api.themoviedb.org/3/discover/' + type +
-    '?api_key=' + TMDB_KEY +
-    '&with_genres=' + genreObj.genre +
-    '&sort_by=popularity.desc' +
-    '&vote_count.gte=100' +
-    '&language=nl-NL' +
-    keywords + exclude + extra +
-    '&page=' + (Math.floor(Math.random() * 3) + 1);
+  const page = Math.floor(Math.random() * 3) + 1;
 
-  try {
+  async function doFetch(lang) {
+    const url = 'https://api.themoviedb.org/3/discover/' + type +
+      '?api_key=' + TMDB_KEY +
+      '&with_genres=' + genreObj.genre +
+      '&sort_by=popularity.desc' +
+      '&vote_count.gte=50' +
+      '&language=' + lang +
+      keywords + exclude + extra +
+      '&page=' + page;
     const res = await fetch(url);
     const data = await res.json();
-    const results = (data.results || []).filter(m => m.poster_path).slice(0, 10);
+    return (data.results || []).filter(m => m.poster_path);
+  }
+
+  try {
+    let results = await doFetch('nl-NL');
+    if (results.length < 3) results = await doFetch('en-US');
+    results = results.slice(0, 10);
 
     // Fetch watch providers for each
     const enriched = await Promise.all(results.map(async (m) => {
