@@ -677,7 +677,10 @@
 
 <canvas id="confetti-canvas"></canvas>
 <div class="header">
-  <img class="logo-img" src="logo.png" alt="Jottum!" onclick="showScreen('screen-home')" style="cursor:pointer;">
+  <div style="position:relative; display:flex; align-items:center; justify-content:center; width:100%;">
+    <button id="global-back-btn" onclick="globalBack()" style="display:none; position:absolute; left:0; background:none; border:none; color:var(--text); font-size:1.8rem; cursor:pointer; padding:0.25rem 0.5rem; line-height:1; opacity:0.7;">‹</button>
+    <img class="logo-img" src="logo.png" alt="Jottum!" onclick="showScreen('screen-home')" style="cursor:pointer;">
+  </div>
   <div class="tagline">Van vraagteken naar jottum!</div>
 </div>
 
@@ -734,7 +737,6 @@
 
 <!-- JOIN NAME -->
 <div id="screen-join-name" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
   <div style="text-align:center; width:100%;">
     <div style="font-size:3rem; margin-bottom:0.5rem;">👋</div>
     <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:0.5rem;">Wat is je naam?</h2>
@@ -748,7 +750,6 @@
 
 <!-- IN-SESSION CATEGORY SWITCH -->
 <div id="screen-modus-cat-session" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-result')">← terug</button>
   <div class="screen-title">Kies een nieuwe categorie</div>
   <div class="home-grid">
     <div class="home-card" onclick="switchSessionGame('eten')">
@@ -766,7 +767,6 @@
 
 <!-- SUBMENU ETEN -->
 <div id="screen-submenu-eten" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
   <div class="screen-title">Wat eten we?</div>
   <div class="submenu-grid">
     <div class="submenu-card" onclick="startGame('lunch')">
@@ -784,7 +784,6 @@
 
 <!-- SUBMENU KIJKEN -->
 <div id="screen-submenu-kijken" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-home')">← terug</button>
   <div class="screen-title">Wat kijken we?</div>
   <div class="submenu-grid">
     <div class="submenu-card" onclick="startGame('film')">
@@ -803,7 +802,6 @@
 
 <!-- MODUS KEUZE: na subcategorie -->
 <div id="screen-modus" class="screen">
-  <button class="back-btn" id="modus-back-btn" onclick="modusBack()">← terug</button>
   <div class="screen-title">Hoe willen jullie spelen?</div>
   <div class="submenu-grid">
     <div class="submenu-card" onclick="pickModus('multi')">
@@ -821,7 +819,6 @@
 
 <!-- NAAM INVOER: na modus keuze -->
 <div id="screen-name" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-modus')">← terug</button>
   <div style="text-align:center; width:100%;">
     <div style="font-size:3rem; margin-bottom:0.5rem;" id="name-screen-icon">👥</div>
     <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:0.5rem;">Wat is jouw naam?</h2>
@@ -835,7 +832,6 @@
 
 <!-- PLAYER SETUP (lokaal, geen sessie) -->
 <div id="screen-players" class="screen">
-  <button class="back-btn" id="players-back-btn" onclick="playersBack()">← terug</button>
   <div class="player-setup">
     <h2>Wie spelen er mee?</h2>
     <div id="player-rows"></div>
@@ -848,7 +844,6 @@
 
 <!-- LOBBY -->
 <div id="screen-lobby" class="screen">
-  <button class="back-btn" onclick="leaveLobby()">← terug</button>
 
   <div style="text-align:center; width:100%;">
     <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem;">Sessie-ID</div>
@@ -871,7 +866,6 @@
   </div>
 
   <button class="btn" onclick="hostStartGame()">Starten →</button>
-  <button class="back-btn" style="align-self:center;" onclick="leaveLobby()">← terug naar overzicht</button>
 </div>
 
 <!-- WAITING (deelnemer) -->
@@ -888,7 +882,6 @@
 
   <button class="btn" id="ready-btn" onclick="toggleReady()" style="background:var(--surface2); color:var(--text); border:1.5px solid #444;">✋ Ik ben er klaar voor!</button>
   <p style="font-size:0.8rem; color:var(--muted); text-align:center;">Wachten tot de host het spel start...</p>
-  <button class="back-btn" style="align-self:center;" onclick="leaveSession()">← verlaat sessie</button>
 </div>
 
 <!-- SWIPE -->
@@ -925,7 +918,6 @@
     <button class="swipe-btn yes" onclick="vote(true)">✅</button>
   </div>
 
-  <button class="back-btn" onclick="confirmBack()">← terug naar overzicht</button>
 </div>
 
 <!-- HANDOFF -->
@@ -936,7 +928,6 @@
     <p style="color: var(--muted); margin-top: 0.5rem; font-size: 0.9rem;" id="handoff-sub">Geef het scherm door</p>
   </div>
   <button class="btn" id="handoff-btn" onclick="nextPlayer()">Doorgeven →</button>
-  <button class="back-btn" onclick="showScreen('screen-home')" style="align-self:center;">← terug naar overzicht</button>
 </div>
 
 <!-- RESULT -->
@@ -980,7 +971,6 @@
 
 <!-- FINGER GAME -->
 <div id="screen-finger" class="screen">
-  <button class="back-btn" onclick="stopFingerGame(); showScreen('screen-home')">← terug naar overzicht</button>
   <div style="text-align:center; width:100%;">
     <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:0.5rem;">Hou je vinger vast</h2>
     <p id="finger-instruction" style="font-size:0.9rem; color:var(--muted);">Leg alle vingers tegelijk op het vlak</p>
@@ -996,7 +986,6 @@
 
 <!-- TMDB SWIPE -->
 <div id="screen-tmdb" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-result')">← terug</button>
 
   <!-- Loading -->
   <div id="tmdb-loading" style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:3rem 0;">
@@ -1062,7 +1051,6 @@
 
 <!-- DICE -->
 <div id="screen-dice" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-home')">← terug naar overzicht</button>
   <div style="width:100%; text-align:center;">
     <div style="font-size:1rem; font-weight:700; margin-bottom:1rem;">Hoeveel dobbelstenen?</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:1.5rem; margin-bottom:1.5rem;">
@@ -1133,7 +1121,6 @@
 
 <!-- WHEEL -->
 <div id="screen-wheel" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-home')">← terug naar overzicht</button>
   <div class="wheel-container">
     <div class="wheel-outer">
       <canvas id="wheelCanvas" style="width:300px; height:300px;"></canvas>
@@ -1154,7 +1141,6 @@
 
 <!-- WILDCARD -->
 <div id="screen-wildcard" class="screen">
-  <button class="back-btn" onclick="showScreen('screen-players')">← terug</button>
   <div style="width:100%; text-align:center;">
     <div style="font-size:1rem; font-weight:400; color:var(--muted); margin-bottom:1.5rem;">Trek aan de hendel voor een willekeurige uitkomst</div>
     <div style="display:flex; justify-content:center; align-items:flex-start; gap:1.5rem; margin-bottom:1.5rem;">
@@ -1324,6 +1310,8 @@ const card = () => document.getElementById('swipe-card');
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  currentScreenId = id;
+  updateBackBtn(id);
   if (id === 'screen-wheel') drawWheel();
   if (id === 'screen-dice') {
     diceCount = 1;
@@ -2052,6 +2040,56 @@ function drawWheel() {
   ctx.textBaseline = 'middle';
   ctx.fillText('🤠', 0, 2);
   ctx.restore();
+}
+
+// GLOBAL BACK
+const SCREEN_BACK = {
+  'screen-submenu-eten': 'screen-home',
+  'screen-submenu-kijken': 'screen-home',
+  'screen-modus': 'screen-home',
+  'screen-name': 'screen-modus',
+  'screen-players': 'screen-modus',
+  'screen-lobby': 'screen-players',
+  'screen-waiting': 'screen-home',
+  'screen-swipe': null, // confirmBack
+  'screen-handoff': 'screen-home',
+  'screen-result': 'screen-home',
+  'screen-wheel': 'screen-home',
+  'screen-dice': 'screen-home',
+  'screen-finger': 'screen-home',
+  'screen-wildcard': 'screen-players',
+  'screen-no-match': 'screen-home',
+  'screen-spectator-slot': 'screen-home',
+  'screen-waiting-results': 'screen-home',
+  'screen-join-name': 'screen-home',
+  'screen-tmdb': 'screen-result',
+  'screen-modus-cat-session': 'screen-result',
+};
+
+let currentScreenId = 'screen-home';
+
+function globalBack() {
+  if (currentScreenId === 'screen-swipe') {
+    confirmBack();
+    return;
+  }
+  if (currentScreenId === 'screen-lobby') {
+    leaveLobby();
+    return;
+  }
+  if (currentScreenId === 'screen-waiting') {
+    leaveSession();
+    return;
+  }
+  const dest = SCREEN_BACK[currentScreenId];
+  if (dest) showScreen(dest);
+  else showScreen('screen-home');
+}
+
+function updateBackBtn(screenId) {
+  const btn = document.getElementById('global-back-btn');
+  if (!btn) return;
+  btn.style.display = screenId === 'screen-home' ? 'none' : 'block';
 }
 
 // SUPABASE
