@@ -719,7 +719,7 @@
     <div class="submenu-card" onclick="chooseModus('multi')">
       <div class="icon">👥</div>
       <h3>Meerdere telefoons</h3>
-      <p>Iedereen swipt mee</p>
+      <p>Iedereen swiped mee</p>
     </div>
     <div class="submenu-card" onclick="chooseModus('solo')">
       <div class="icon">📱</div>
@@ -1205,7 +1205,7 @@ function nextPlayer() {
   updateSwipeUI();
 }
 
-function showResult(sessionVotes, sessionPlayers) {
+function showResult(sessionVotes, sessionPlayers, winnerIdx) {
   // Use session votes if available (multiplayer), else local votes
   const allPlayerNames = sessionPlayers || playerNames;
   const allVotes = sessionVotes
@@ -1219,13 +1219,21 @@ function showResult(sessionVotes, sessionPlayers) {
     const playerVotes = allPlayerNames.map((_, p) => allVotes[p] ? allVotes[p][i] : null);
     const allYes = playerVotes.every(v => v === true);
     const anyYes = playerVotes.some(v => v === true);
-    if (allYes) matches.push({ card: c, playerVotes });
-    else if (anyYes) partial.push({ card: c, playerVotes });
+    if (allYes) matches.push({ card: c, playerVotes, index: i });
+    else if (anyYes) partial.push({ card: c, playerVotes, index: i });
   });
 
-  const winner = matches.length > 0
-    ? matches[Math.floor(Math.random() * matches.length)].card
-    : partial.length > 0 ? partial[0].card : null;
+  // Use fixed winner index if provided (multiplayer), else random from matches
+  let winner;
+  if (winnerIdx !== undefined && winnerIdx >= 0) {
+    winner = currentCards[winnerIdx];
+  } else if (matches.length > 0) {
+    winner = matches[Math.floor(Math.random() * matches.length)].card;
+  } else if (partial.length > 0) {
+    winner = partial[0].card;
+  } else {
+    winner = null;
+  }
 
   if (matches.length > 0) { launchConfetti(); playResult(); }
 
@@ -1638,7 +1646,8 @@ async function goToLobby() {
       cards: cards,
       votes: {},
       players: [myPlayerName],
-      started: false
+      started: false,
+      winner_index: null
     });
   } catch(e) {
     alert('Kon geen sessie aanmaken. Controleer je verbinding.');
@@ -1874,13 +1883,52 @@ async function pollForResults() {
 
       if (allDone) {
         clearInterval(resultsPollingInterval);
-        showResult(votesData, players);
+        // Only host calculates and saves winner; others wait for winner field
+        if (isHost) {
+          const winnerIndex = calculateWinner(votesData, players);
+          await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { winner_index: winnerIndex });
+          showResult(votesData, players, winnerIndex);
+        } else {
+          // Non-host: poll for winner_index
+          pollForWinner(votesData, players);
+        }
       }
     } catch(e) { console.error('pollForResults error:', e); }
   }
 
   checkResults();
   resultsPollingInterval = setInterval(checkResults, 1500);
+}
+
+function calculateWinner(votesData, players) {
+  const allVotes = players.map(p => votesData[p] || []);
+  for (let i = 0; i < currentCards.length; i++) {
+    if (allVotes.every(v => v[i] === true)) return i;
+  }
+  // No full match: find card with most yes votes
+  let best = -1, bestCount = 0;
+  for (let i = 0; i < currentCards.length; i++) {
+    const count = allVotes.filter(v => v[i] === true).length;
+    if (count > bestCount) { bestCount = count; best = i; }
+  }
+  return best;
+}
+
+function pollForWinner(votesData, players) {
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    if (attempts > 20) { clearInterval(interval); return; }
+    try {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=winner_index');
+      if (!rows || !rows[0]) return;
+      const idx = rows[0].winner_index;
+      if (idx !== null && idx !== undefined) {
+        clearInterval(interval);
+        showResult(votesData, players, idx);
+      }
+    } catch(e) {}
+  }, 1000);
 }
 
 async function submitVotesToSession() {
