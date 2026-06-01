@@ -3187,6 +3187,8 @@ function addWheelOption() {
   wheelOptions.push(val);
   input.value = '';
   renderTags();
+  drawWheel();
+}
 
 // SPLASH
 function initSplash() {
@@ -3203,8 +3205,6 @@ function initSplash() {
 }
 
 setTimeout(initSplash, 100);
-  drawWheel();
-}
 
 function removeWheelOption(i) {
   wheelOptions.splice(i, 1);
