@@ -950,7 +950,7 @@
       <div id="result-tip" style="display:none; margin-top:0.75rem; font-size:0.9rem; font-weight:600; color:var(--accent3); background:rgba(107,255,200,0.08); border-radius:10px; padding:0.5rem 0.75rem;"></div>
     </div>
     <div id="result-after-btns" style="display:none; width:100%; margin-top:0.75rem; flex-direction:column; gap:0.5rem;">
-      <button onclick="startTMDBSwipe(currentWinnerTitle)" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.85rem;font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;">🎬 Kies een film</button>
+      <button onclick="startTMDBSwipe(window.currentWinnerTitle)" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.85rem;font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;">🎬 Kies een film</button>
       <button onclick="startSnackSession()" style="width:100%;background:var(--surface2);color:var(--text);border:1.5px solid #444;border-radius:12px;padding:0.85rem;font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;">🍿 Kies snacks</button>
     </div>
     <div class="result-list" id="result-list"></div>
@@ -1586,6 +1586,7 @@ function showResult(sessionVotes, sessionPlayers, winnerIdx) {
     }
     if (afterBtns) { afterBtns.style.display = 'flex'; afterBtns.style.flexDirection = 'column'; }
     window.currentWinnerTitle = winner.title;
+    console.log('Winner title saved:', winner.title, 'game:', currentGame);
   }
 
   // Show correct buttons based on role
@@ -2706,8 +2707,13 @@ async function fetchTMDBFilms(genreTitle) {
   }
 
   try {
+    console.log('Fetching TMDB for genre:', genreTitle, 'genreObj:', JSON.stringify(genreObj), 'type:', type);
     let results = await doFetch('nl-NL');
-    if (results.length < 3) results = await doFetch('en-US');
+    console.log('NL results:', results.length);
+    if (results.length < 3) {
+      results = await doFetch('en-US');
+      console.log('EN results:', results.length);
+    }
     results = results.slice(0, 10);
 
     // Fetch watch providers for each
@@ -2747,13 +2753,16 @@ async function fetchTMDBFilms(genreTitle) {
 }
 
 async function startTMDBSwipe(genreTitle) {
+  console.log('startTMDBSwipe called with:', genreTitle, 'currentGame:', currentGame);
   document.getElementById('tmdb-loading').style.display = 'flex';
+  document.getElementById('tmdb-loading').innerHTML = '<div style="font-size:2rem;">🎬</div><p style="color:var(--muted);font-size:0.9rem;">Films ophalen...</p>';
   document.getElementById('tmdb-swipe-area').style.display = 'none';
   showScreen('screen-tmdb');
 
   tmdbCards = await fetchTMDBFilms(genreTitle);
+  console.log('TMDB cards fetched:', tmdbCards.length, 'for genre:', genreTitle);
   if (!tmdbCards.length) {
-    document.getElementById('tmdb-loading').innerHTML = '<p style="color:var(--muted)">Geen films gevonden. Probeer opnieuw.</p>';
+    document.getElementById('tmdb-loading').innerHTML = '<p style="color:var(--muted)">Geen films gevonden voor "' + genreTitle + '". Probeer opnieuw.</p>';
     return;
   }
 
