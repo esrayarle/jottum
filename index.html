@@ -415,12 +415,12 @@
   .option-tag {
     background: var(--surface2);
     border-radius: 50px;
-    padding: 0.3rem 0.75rem;
-    font-size: 0.82rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
     font-weight: 400;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
 
   .option-tag button {
@@ -437,7 +437,7 @@
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 50px;
+    border-radius: 12px;
     padding: 0.85rem 2.5rem;
     font-family: var(--font);
     font-size: 1rem;
@@ -651,6 +651,11 @@
         <h3>Rad van fortuin</h3>
         <p>Vul zelf opties in en draai</p>
       </div>
+      <div class="home-card" style="grid-column: 1 / -1;" onclick="showScreen('screen-dice')">
+        <div class="icon">🎲</div>
+        <h3>Dobbelstenen</h3>
+        <p>Gooi 1 tot 6 dobbelstenen</p>
+      </div>
     </div>
   </div>
 </div>
@@ -669,6 +674,24 @@
     onkeydown="if(event.key==='Enter') joinSession()" />
   <button class="btn" onclick="joinSession()">Deelnemen</button>
   <div id="join-name-error" style="color:var(--accent2); font-size:0.85rem; text-align:center; min-height:1rem;"></div>
+</div>
+
+<!-- IN-SESSION CATEGORY SWITCH -->
+<div id="screen-modus-cat-session" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-result')">← terug</button>
+  <div class="screen-title">Kies een nieuwe categorie</div>
+  <div class="home-grid">
+    <div class="home-card" onclick="switchSessionGame('eten')">
+      <div class="icon">🍽️</div>
+      <h3>Wat eten we?</h3>
+      <p>Lunch of diner</p>
+    </div>
+    <div class="home-card" onclick="switchSessionGame('kijken')">
+      <div class="icon">🎬</div>
+      <h3>Wat kijken we?</h3>
+      <p>Film of serie</p>
+    </div>
+  </div>
 </div>
 
 <!-- SUBMENU ETEN -->
@@ -871,6 +894,68 @@
   </div>
 </div>
 
+<!-- DICE -->
+<div id="screen-dice" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-home')">← terug naar overzicht</button>
+  <div style="width:100%; text-align:center;">
+    <div style="font-size:1rem; font-weight:700; margin-bottom:1rem;">Hoeveel dobbelstenen?</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:1.5rem; margin-bottom:1.5rem;">
+      <button onclick="changeDiceCount(-1)" style="width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1.5px solid #444;color:var(--text);font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+      <div id="dice-count-display" style="font-size:2.5rem;font-weight:800;color:var(--accent);min-width:2rem;">1</div>
+      <button onclick="changeDiceCount(1)" style="width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1.5px solid #444;color:var(--text);font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+    </div>
+    <div id="dice-display" style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;min-height:120px;align-items:center;margin-bottom:1.5rem;"></div>
+    <div id="dice-total" style="font-size:1rem;color:var(--muted);margin-bottom:1.5rem;min-height:1.5rem;"></div>
+    <button onclick="rollDice()" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.85rem 2.5rem;font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;">🎲 Gooien!</button>
+  </div>
+</div>
+
+<!-- SPECTATOR SLOT -->
+<div id="screen-spectator-slot" class="screen">
+  <div style="text-align:center; width:100%; padding:2rem 0;">
+    <div style="font-size:2rem; margin-bottom:0.5rem;">🎰</div>
+    <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:0.5rem;">Geen match!</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1.5rem;">De host gokt voor jullie...</p>
+    <div style="background:var(--surface); border-radius:20px; padding:1.2rem; display:inline-block; margin-bottom:1rem;">
+      <div style="display:flex; gap:8px;">
+        <div class="slot-window"><div class="slot-inner" id="spec-inner-0"></div></div>
+        <div class="slot-window"><div class="slot-inner" id="spec-inner-1"></div></div>
+        <div class="slot-window"><div class="slot-inner" id="spec-inner-2"></div></div>
+      </div>
+    </div>
+    <div id="spec-result" style="font-size:1.4rem; font-weight:700; color:var(--accent); min-height:2rem; margin-top:0.5rem;"></div>
+  </div>
+</div>
+
+<!-- NO MATCH SLOT (host) -->
+<div id="screen-no-match" class="screen">
+  <div style="width:100%; text-align:center;">
+    <div style="font-size:2rem; margin-bottom:0.5rem;">😅</div>
+    <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:0.25rem;">Geen match!</h2>
+    <p style="color:var(--muted); font-size:0.85rem; margin-bottom:1.5rem;">Trek aan de hendel voor een willekeurige uitkomst</p>
+    <div style="display:flex; justify-content:center; align-items:flex-start; gap:1.5rem; margin-bottom:1.5rem;">
+      <div style="background:var(--surface); border-radius:20px; padding:1.2rem 1rem; border:2px solid #333; display:inline-block;">
+        <div style="display:flex; gap:8px;">
+          <div class="slot-window"><div class="slot-inner" id="nm-inner-0"></div></div>
+          <div class="slot-window"><div class="slot-inner" id="nm-inner-1"></div></div>
+          <div class="slot-window"><div class="slot-inner" id="nm-inner-2"></div></div>
+        </div>
+      </div>
+      <div id="nm-lever-wrap" style="cursor:pointer; display:flex; flex-direction:column; align-items:center;" onclick="pullNoMatchLever()">
+        <svg id="nm-lever-svg" width="44" height="130" viewBox="0 0 44 130" style="transform-origin: 22px 118px; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);">
+          <circle cx="22" cy="16" r="14" fill="#ff6b1a" stroke="#c94d00" stroke-width="3"/>
+          <circle cx="17" cy="11" r="4" fill="rgba(255,255,255,0.3)"/>
+          <rect x="18" y="28" width="8" height="82" rx="4" fill="#777"/>
+          <rect x="19" y="28" width="3" height="82" rx="2" fill="rgba(255,255,255,0.15)"/>
+          <rect x="8" y="112" width="28" height="14" rx="5" fill="#444" stroke="#555" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+    <div id="nm-result" style="font-size:1.4rem; font-weight:700; color:var(--accent); min-height:2rem;"></div>
+  </div>
+  <button class="btn" id="nm-home-btn" style="display:none;" onclick="showScreen('screen-home')">← terug naar overzicht</button>
+</div>
+
 <!-- WHEEL -->
 <div id="screen-wheel" class="screen">
   <button class="back-btn" onclick="showScreen('screen-home')">← terug naar overzicht</button>
@@ -975,7 +1060,7 @@ const GAMES = {
       { emoji: '🚀', title: 'Sci-Fi', sub: 'toekomst, ruimte & technologie', tips: ['Interstellar', 'Arrival', 'Ex Machina', 'Everything Everywhere All At Once'] },
       { emoji: '🧩', title: 'Mystery', sub: 'raadsels & onverwachte wendingen', tips: ['Knives Out', 'The Prestige', 'Memento', 'Shutter Island'] },
       { emoji: '👻', title: 'Horror', sub: 'enge films & jumpscares', tips: ['Hereditary', 'Get Out', 'A Quiet Place', 'The Conjuring'] },
-      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd', tips: ['Spider-Man: Into the Spider-Verse', 'Soul', 'Princess Mononoke', 'The Incredibles'] },
+      { emoji: '🧸', title: 'Animatie', sub: 'Disney & Dreamworks klassiekers', tips: ['The Lion King', 'Shrek', 'Frozen', 'Moana', 'Kung Fu Panda', 'Encanto', 'Tangled', 'How to Train Your Dragon'] },
       { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief', tips: ['Free Solo', 'Making a Murderer', 'The Social Dilemma', 'Icarus'] },
       { emoji: '🎭', title: 'Drama', sub: 'emotioneel & diepgaand', tips: ['The Shawshank Redemption', 'Schindlers List', 'Whiplash', '1917'] },
       { emoji: '🕵️', title: 'Crime', sub: 'moord, mysteries & detectives', tips: ['Zodiac', 'Se7en', 'Heat', 'The Departed'] },
@@ -995,7 +1080,7 @@ const GAMES = {
       { emoji: '👻', title: 'Horror', sub: 'enge series & jumpscares', tips: ['The Haunting of Hill House', 'Midnight Mass', 'Stranger Things', 'American Horror Story'] },
       { emoji: '💕', title: 'Romantiek', sub: 'liefde, drama & spanning', tips: ['Normal People', 'Bridgerton', 'You', 'Emily in Paris'] },
       { emoji: '📺', title: 'Documentaire', sub: 'waargebeurd & informatief', tips: ['Making a Murderer', 'The Last Dance', 'Tiger King', 'Wild Wild Country'] },
-      { emoji: '🧸', title: 'Animatie', sub: 'voor elk humeur & elke leeftijd', tips: ['Arcane', 'Bojack Horseman', 'Avatar: The Last Airbender', 'Rick and Morty'] },
+      { emoji: '🧸', title: 'Animatie', sub: 'Disney & Dreamworks klassiekers', tips: ['The Lion King', 'Shrek', 'Frozen', 'Moana', 'Kung Fu Panda', 'Encanto', 'Tangled', 'How to Train Your Dragon'] },
       { emoji: '🌟', title: 'Reality', sub: 'echte mensen, echte drama', tips: ['The Circle', 'Love is Blind', 'Squid Game: The Challenge', 'Survivor'] },
       { emoji: '👾', title: 'Miniserie', sub: 'compact verhaal in 3-6 afleveringen', tips: ['Chernobyl', 'The Queens Gambit', 'Mare of Easttown', 'Band of Brothers'] },
     ]
@@ -1223,16 +1308,33 @@ function showResult(sessionVotes, sessionPlayers, winnerIdx) {
     else if (anyYes) partial.push({ card: c, playerVotes, index: i });
   });
 
-  // Use fixed winner index if provided (multiplayer), else random from matches
+  // Use fixed winner index if provided (multiplayer), else best partial match
   let winner;
-  if (winnerIdx !== undefined && winnerIdx >= 0) {
+  if (winnerIdx !== undefined && winnerIdx >= 0 && winnerIdx < currentCards.length) {
     winner = currentCards[winnerIdx];
   } else if (matches.length > 0) {
-    winner = matches[Math.floor(Math.random() * matches.length)].card;
+    winner = matches[0].card;
   } else if (partial.length > 0) {
+    // Best partial = most yes votes
+    partial.sort((a, b) => b.playerVotes.filter(v => v).length - a.playerVotes.filter(v => v).length);
     winner = partial[0].card;
   } else {
     winner = null;
+  }
+
+  // No match at all: go to slot machine
+  if (matches.length === 0 && partial.length === 0) {
+    if (sessionId && !isHost) {
+      // Spectator: show spectator slot screen and poll for result
+      initSpectatorSlot();
+      showScreen('screen-spectator-slot');
+      pollForSlotResult();
+    } else {
+      // Host or solo: show no-match slot
+      initNoMatchSlot();
+      showScreen('screen-no-match');
+    }
+    return;
   }
 
   if (matches.length > 0) { launchConfetti(); playResult(); }
@@ -1273,9 +1375,12 @@ function showResult(sessionVotes, sessionPlayers, winnerIdx) {
   if (snackEl) snackEl.style.display = 'none';
 
   if (winner && (currentGame === 'film' || currentGame === 'serie') && winner.tips) {
-    const tip = winner.tips[Math.floor(Math.random() * winner.tips.length)];
+    // Use winner index as seed so everyone gets same tip
+    const tipIdx = (winnerIdx !== undefined && winnerIdx >= 0 ? winnerIdx : 0) % winner.tips.length;
+    const tip = winner.tips[tipIdx];
+    const url = STREAMING_LINKS[tip] || ('https://www.google.com/search?q=' + encodeURIComponent(tip + ' streaming'));
     if (tipEl) {
-      tipEl.textContent = '🎬 Tip: ' + tip;
+      tipEl.innerHTML = '🎬 Tip: <a href="' + url + '" target="_blank" style="color:var(--accent3); text-decoration:underline; font-weight:700;">' + tip + '</a>';
       tipEl.style.display = 'block';
     }
     if (snackEl) snackEl.style.display = 'block';
@@ -1494,8 +1599,161 @@ function launchConfetti() {
   draw();
 }
 
+// NO-MATCH SLOT
+let nmLeverPulled = false;
+
+function initNoMatchSlot() {
+  nmLeverPulled = false;
+  const allEmojis = currentCards.map(c => c.emoji);
+  for (let i = 0; i < 3; i++) {
+    const inner = document.getElementById('nm-inner-' + i);
+    if (!inner) continue;
+    inner.innerHTML = '';
+    for (let j = 0; j < 12; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'slot-cell';
+      cell.textContent = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+      inner.appendChild(cell);
+    }
+    inner.style.transition = 'none';
+    inner.style.transform = 'translateY(0)';
+  }
+  document.getElementById('nm-result').innerHTML = '';
+  document.getElementById('nm-home-btn').style.display = 'none';
+  const svg = document.getElementById('nm-lever-svg');
+  if (svg) svg.style.transform = 'rotate(0deg)';
+}
+
+function initSpectatorSlot() {
+  const allEmojis = currentCards.map(c => c.emoji);
+  for (let i = 0; i < 3; i++) {
+    const inner = document.getElementById('spec-inner-' + i);
+    if (!inner) continue;
+    inner.innerHTML = '';
+    for (let j = 0; j < 12; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'slot-cell';
+      cell.textContent = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+      inner.appendChild(cell);
+    }
+    inner.style.transition = 'none';
+    inner.style.transform = 'translateY(0)';
+  }
+  document.getElementById('spec-result').innerHTML = '';
+}
+
+function pullNoMatchLever() {
+  if (nmLeverPulled) return;
+  nmLeverPulled = true;
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  playSlotMachine();
+
+  const svg = document.getElementById('nm-lever-svg');
+  if (svg) svg.style.transform = 'rotate(28deg)';
+
+  setTimeout(() => {
+    if (svg) svg.style.transform = 'rotate(0deg)';
+    setTimeout(() => spinNoMatchSlots(), 200);
+  }, 380);
+}
+
+function spinNoMatchSlots() {
+  const winner = currentCards[Math.floor(Math.random() * currentCards.length)];
+  const winnerCardIndex = currentCards.indexOf(winner);
+  const cellH = 76;
+  const delays = [0, 400, 800];
+  const durations = [1200, 1600, 2100];
+
+  delays.forEach((delay, i) => {
+    const inner = document.getElementById('nm-inner-' + i);
+    if (!inner) return;
+    const cells = inner.children;
+    const total = cells.length;
+    cells[total - 1].textContent = winner.emoji;
+    const targetY = -((total - 1) * cellH);
+    setTimeout(() => {
+      inner.style.transition = 'transform ' + (durations[i] / 1000) + 's cubic-bezier(0.17, 0.67, 0.12, 1.0)';
+      inner.style.transform = 'translateY(' + targetY + 'px)';
+    }, delay);
+    // Tick sounds
+    let elapsed = 0, interval = 60;
+    function tick() {
+      if (!audioCtx) return;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'square';
+      o.frequency.setValueAtTime(180 + Math.random() * 60, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      o.start(); o.stop(audioCtx.currentTime + 0.04);
+      elapsed += interval; interval = Math.min(interval * 1.18, 400);
+      if (elapsed < durations[i]) setTimeout(tick, interval);
+    }
+    setTimeout(tick, delay);
+  });
+
+  const totalTime = delays[2] + durations[2];
+  setTimeout(async () => {
+    const resultEl = document.getElementById('nm-result');
+    resultEl.innerHTML = winner.emoji + ' ' + winner.title;
+    document.getElementById('nm-home-btn').style.display = 'block';
+    playResult();
+
+    // Save slot result to Supabase for spectators
+    if (sessionId && isHost) {
+      try {
+        await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { winner_index: winnerCardIndex });
+        // Also animate spectator slots with same winner
+        animateSpectatorSlots(winner, winnerCardIndex);
+      } catch(e) {}
+    }
+  }, totalTime + 200);
+}
+
+function animateSpectatorSlots(winner, winnerCardIndex) {
+  // This is called by host after spinning - spectators will see via pollForSlotResult
+}
+
+function pollForSlotResult() {
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    if (attempts > 60) { clearInterval(interval); return; }
+    try {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=winner_index');
+      if (!rows || !rows[0]) return;
+      const idx = rows[0].winner_index;
+      if (idx !== null && idx !== undefined && idx >= 0) {
+        clearInterval(interval);
+        const winner = currentCards[idx];
+        if (!winner) return;
+        // Animate spectator reels to winner
+        const cellH = 76;
+        const delays = [0, 400, 800];
+        const durations = [1200, 1600, 2100];
+        delays.forEach((delay, i) => {
+          const inner = document.getElementById('spec-inner-' + i);
+          if (!inner) return;
+          const cells = inner.children;
+          cells[cells.length - 1].textContent = winner.emoji;
+          const targetY = -((cells.length - 1) * cellH);
+          setTimeout(() => {
+            inner.style.transition = 'transform ' + (durations[i] / 1000) + 's cubic-bezier(0.17, 0.67, 0.12, 1.0)';
+            inner.style.transform = 'translateY(' + targetY + 'px)';
+          }, delay);
+        });
+        setTimeout(() => {
+          document.getElementById('spec-result').textContent = winner.emoji + ' ' + winner.title;
+          playResult();
+        }, delays[2] + durations[2] + 200);
+      }
+    } catch(e) {}
+  }, 1000);
+}
+
 // WHEEL
-let wheelOptions = ['Pizza', 'Sushi', 'Pasta', 'Burger', 'Mexicaans'];
+let wheelOptions = [];
 let isSpinning = false;
 let wheelAngle = 0;
 
@@ -1942,14 +2200,21 @@ async function submitVotesToSession() {
   } catch(e) {}
 }
 
-function startSnackSession() {
-  const prevGame = currentGame;
+async function startSnackSession() {
   currentGame = 'snacks';
-  sessionId = null;
-  isHost = false;
-  if (currentModus === 'multi') {
-    initPlayers();
-    goToLobby();
+  if (sessionId && isHost) {
+    const newCards = [...GAMES['snacks'].cards].sort(() => Math.random() - 0.5);
+    currentCards = newCards;
+    await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', {
+      game: 'snacks', started: false, votes: {}, ready_list: [], winner_index: null, cards: newCards
+    }).catch(() => {});
+    document.getElementById('lobby-code').textContent = sessionId;
+    showScreen('screen-lobby');
+    pollLobby();
+  } else if (sessionId && !isHost) {
+    document.getElementById('waiting-code').textContent = sessionId;
+    showScreen('screen-waiting');
+    pollForStart(sessionId, myPlayerName);
   } else {
     currentCards = [...GAMES['snacks'].cards].sort(() => Math.random() - 0.5);
     currentCardIndex = 0;
@@ -1960,30 +2225,27 @@ function startSnackSession() {
   }
 }
 
-function restartSameGame() {
+async function switchSessionGame(cat) {
+  // Show submenu for cat, but keep session
+  if (cat === 'eten') showScreen('screen-submenu-eten');
+  else showScreen('screen-submenu-kijken');
+}
+
+async function restartSameGame() {
   if (sessionId && isHost) {
-    // Reset session and go back to lobby
-    sbFetch('sessions?id=eq.' + sessionId, 'PATCH', {
-      started: false,
-      votes: {},
-      ready_list: [],
-      cards: [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5)
-    }).then(async () => {
-      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=cards');
-      if (rows && rows[0]) currentCards = rows[0].cards;
-      document.getElementById('lobby-code').textContent = sessionId;
-      showScreen('screen-lobby');
-      pollLobby();
-    }).catch(() => {
-      showScreen('screen-modus');
-    });
+    const newCards = [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5);
+    currentCards = newCards;
+    await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', {
+      started: false, votes: {}, ready_list: [], winner_index: null, cards: newCards
+    }).catch(() => {});
+    document.getElementById('lobby-code').textContent = sessionId;
+    showScreen('screen-lobby');
+    pollLobby();
   } else if (sessionId && !isHost) {
-    // Joiner: go back to waiting screen
     document.getElementById('waiting-code').textContent = sessionId;
     showScreen('screen-waiting');
     pollForStart(sessionId, myPlayerName);
   } else {
-    // Solo: restart same game
     currentCards = [...GAMES[currentGame].cards].sort(() => Math.random() - 0.5);
     currentCardIndex = 0;
     currentPlayer = 0;
@@ -1995,8 +2257,14 @@ function restartSameGame() {
 
 function chooseOtherCategory() {
   if (sessionPollInterval) clearInterval(sessionPollInterval);
-  const parent = GAMES[currentGame] ? GAMES[currentGame].parentMenu : 'screen-home';
-  showScreen(parent || 'screen-home');
+  if (resultsPollingInterval) clearInterval(resultsPollingInterval);
+  // Keep lobby/session intact, just pick new category
+  if (sessionId && isHost) {
+    showScreen('screen-modus-cat-session');
+  } else {
+    const parent = GAMES[currentGame] ? GAMES[currentGame].parentMenu : 'screen-home';
+    showScreen(parent || 'screen-home');
+  }
 }
 
 function endSession() {
@@ -2004,6 +2272,63 @@ function endSession() {
   sessionId = null;
   isHost = false;
   showScreen('screen-home');
+}
+
+const STREAMING_LINKS = {"The Lion King": "https://www.disneyplus.com", "Shrek": "https://www.netflix.com/search?q=Shrek", "Frozen": "https://www.disneyplus.com", "Moana": "https://www.disneyplus.com", "Kung Fu Panda": "https://www.netflix.com/search?q=Kung+Fu+Panda", "Encanto": "https://www.disneyplus.com", "Tangled": "https://www.disneyplus.com", "How to Train Your Dragon": "https://www.netflix.com/search?q=How+to+Train+Your+Dragon", "The Grand Budapest Hotel": "https://www.netflix.com/search?q=Grand+Budapest+Hotel", "Superbad": "https://www.netflix.com/search?q=Superbad", "Game Night": "https://www.netflix.com/search?q=Game+Night", "Knives Out": "https://www.netflix.com/search?q=Knives+Out", "Parasite": "https://www.netflix.com/search?q=Parasite", "Gone Girl": "https://www.netflix.com/search?q=Gone+Girl", "Oldboy": "https://www.netflix.com/search?q=Oldboy", "Prisoners": "https://www.netflix.com/search?q=Prisoners", "Mad Max: Fury Road": "https://www.netflix.com/search?q=Mad+Max", "John Wick": "https://www.netflix.com/search?q=John+Wick", "Mission Impossible": "https://www.netflix.com/search?q=Mission+Impossible", "The Dark Knight": "https://www.netflix.com/search?q=Dark+Knight", "La La Land": "https://www.netflix.com/search?q=La+La+Land", "About Time": "https://www.netflix.com/search?q=About+Time", "The Notebook": "https://www.netflix.com/search?q=The+Notebook", "Crazy Rich Asians": "https://www.netflix.com/search?q=Crazy+Rich+Asians", "Interstellar": "https://www.netflix.com/search?q=Interstellar", "Arrival": "https://www.netflix.com/search?q=Arrival", "Ex Machina": "https://www.netflix.com/search?q=Ex+Machina", "Everything Everywhere All At Once": "https://www.netflix.com/search?q=Everything+Everywhere", "The Prestige": "https://www.netflix.com/search?q=The+Prestige", "Memento": "https://www.netflix.com/search?q=Memento", "Shutter Island": "https://www.netflix.com/search?q=Shutter+Island", "Hereditary": "https://www.netflix.com/search?q=Hereditary", "Get Out": "https://www.netflix.com/search?q=Get+Out", "A Quiet Place": "https://www.netflix.com/search?q=A+Quiet+Place", "The Conjuring": "https://www.netflix.com/search?q=The+Conjuring", "Free Solo": "https://www.disneyplus.com", "Making a Murderer": "https://www.netflix.com/search?q=Making+a+Murderer", "The Social Dilemma": "https://www.netflix.com/search?q=Social+Dilemma", "Icarus": "https://www.netflix.com/search?q=Icarus", "The Shawshank Redemption": "https://www.netflix.com/search?q=Shawshank", "Whiplash": "https://www.netflix.com/search?q=Whiplash", "1917": "https://www.netflix.com/search?q=1917", "Zodiac": "https://www.netflix.com/search?q=Zodiac", "Se7en": "https://www.netflix.com/search?q=Se7en", "Heat": "https://www.netflix.com/search?q=Heat", "The Departed": "https://www.netflix.com/search?q=The+Departed", "Avengers: Endgame": "https://www.disneyplus.com", "Spider-Man: No Way Home": "https://www.netflix.com/search?q=Spider-Man+No+Way+Home", "Thor: Ragnarok": "https://www.disneyplus.com", "Schitts Creek": "https://www.netflix.com/search?q=Schitts+Creek", "Abbott Elementary": "https://www.netflix.com/search?q=Abbott+Elementary", "What We Do in the Shadows": "https://www.netflix.com/search?q=What+We+Do+in+the+Shadows", "Arrested Development": "https://www.netflix.com/search?q=Arrested+Development", "Ozark": "https://www.netflix.com/search?q=Ozark", "Succession": "https://www.hbomax.com", "The Night Of": "https://www.hbomax.com", "Severance": "https://tv.apple.com", "True Detective": "https://www.hbomax.com", "Mindhunter": "https://www.netflix.com/search?q=Mindhunter", "The Wire": "https://www.hbomax.com", "Breaking Bad": "https://www.netflix.com/search?q=Breaking+Bad", "The Bear": "https://www.disneyplus.com", "Normal People": "https://www.hulu.com", "This Is Us": "https://www.netflix.com/search?q=This+Is+Us", "Black Mirror": "https://www.netflix.com/search?q=Black+Mirror", "Dark": "https://www.netflix.com/search?q=Dark", "Westworld": "https://www.hbomax.com", "Twin Peaks": "https://www.netflix.com/search?q=Twin+Peaks", "The Haunting of Hill House": "https://www.netflix.com/search?q=Haunting+of+Hill+House", "Broadchurch": "https://www.netflix.com/search?q=Broadchurch", "Midnight Mass": "https://www.netflix.com/search?q=Midnight+Mass", "Stranger Things": "https://www.netflix.com/search?q=Stranger+Things", "American Horror Story": "https://www.netflix.com/search?q=American+Horror+Story", "Bridgerton": "https://www.netflix.com/search?q=Bridgerton", "You": "https://www.netflix.com/search?q=You", "Emily in Paris": "https://www.netflix.com/search?q=Emily+in+Paris", "The Last Dance": "https://www.netflix.com/search?q=The+Last+Dance", "Tiger King": "https://www.netflix.com/search?q=Tiger+King", "Wild Wild Country": "https://www.netflix.com/search?q=Wild+Wild+Country", "Arcane": "https://www.netflix.com/search?q=Arcane", "Bojack Horseman": "https://www.netflix.com/search?q=Bojack+Horseman", "Rick and Morty": "https://www.netflix.com/search?q=Rick+and+Morty", "The Circle": "https://www.netflix.com/search?q=The+Circle", "Love is Blind": "https://www.netflix.com/search?q=Love+is+Blind", "Squid Game: The Challenge": "https://www.netflix.com/search?q=Squid+Game+Challenge", "Survivor": "https://www.netflix.com/search?q=Survivor", "Chernobyl": "https://www.hbomax.com", "Mare of Easttown": "https://www.hbomax.com", "Band of Brothers": "https://www.hbomax.com"};
+
+// DICE
+let diceCount = 1;
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
+function changeDiceCount(delta) {
+  diceCount = Math.max(1, Math.min(6, diceCount + delta));
+  document.getElementById('dice-count-display').textContent = diceCount;
+  document.getElementById('dice-display').innerHTML = '';
+  document.getElementById('dice-total').textContent = '';
+}
+
+function rollDice() {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  // Dice roll sound
+  if (audioCtx) {
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type = 'square';
+        o.frequency.setValueAtTime(100 + Math.random() * 80, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+        o.start(); o.stop(audioCtx.currentTime + 0.06);
+      }, i * 80);
+    }
+  }
+
+  const results = [];
+  for (let i = 0; i < diceCount; i++) {
+    results.push(Math.floor(Math.random() * 6) + 1);
+  }
+
+  // Animate
+  const display = document.getElementById('dice-display');
+  display.innerHTML = '';
+  let frame = 0;
+  const totalFrames = 12;
+  const interval = setInterval(() => {
+    display.innerHTML = results.map(() =>
+      '<div style="font-size:4rem;animation:diceRoll 0.1s;">' + DICE_FACES[Math.floor(Math.random() * 6)] + '</div>'
+    ).join('');
+    frame++;
+    if (frame >= totalFrames) {
+      clearInterval(interval);
+      display.innerHTML = results.map(r =>
+        '<div style="font-size:4rem;">' + DICE_FACES[r - 1] + '</div>'
+      ).join('');
+      const total = results.reduce((a, b) => a + b, 0);
+      document.getElementById('dice-total').textContent = diceCount > 1 ? 'Totaal: ' + total : '';
+    }
+  }, 80);
 }
 
 // AUDIO
