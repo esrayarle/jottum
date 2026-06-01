@@ -505,6 +505,7 @@
   #splash-screen.fade-out {
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
   }
 
   #splash-logo {
@@ -3189,21 +3190,19 @@ function addWheelOption() {
 
 // SPLASH
 function initSplash() {
+  const splash = document.getElementById('splash-screen');
+  if (!splash) return;
   setTimeout(() => {
-    const splash = document.getElementById('splash-screen');
-    if (!splash) return;
-    splash.classList.add('fade-out');
-    setTimeout(() => { if (splash.parentNode) splash.remove(); }, 500);
+    splash.style.opacity = '0';
+    splash.style.pointerEvents = 'none';
+    splash.style.visibility = 'hidden';
+    setTimeout(() => {
+      splash.style.display = 'none';
+    }, 500);
   }, 1500);
 }
 
-if (document.readyState === 'complete') {
-  initSplash();
-} else {
-  window.addEventListener('load', initSplash);
-  // Fallback: always hide after 2.5s
-  setTimeout(initSplash, 2500);
-}
+setTimeout(initSplash, 100);
   drawWheel();
 }
 
