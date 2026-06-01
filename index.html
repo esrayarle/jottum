@@ -3188,13 +3188,22 @@ function addWheelOption() {
   renderTags();
 
 // SPLASH
-window.addEventListener('load', () => {
+function initSplash() {
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
+    if (!splash) return;
     splash.classList.add('fade-out');
-    setTimeout(() => splash.remove(), 500);
+    setTimeout(() => { if (splash.parentNode) splash.remove(); }, 500);
   }, 1500);
-});
+}
+
+if (document.readyState === 'complete') {
+  initSplash();
+} else {
+  window.addEventListener('load', initSplash);
+  // Fallback: always hide after 2.5s
+  setTimeout(initSplash, 2500);
+}
   drawWheel();
 }
 
