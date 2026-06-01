@@ -1042,8 +1042,11 @@
   <div id="tmdb-result" style="display:none;flex-direction:column;align-items:center;gap:1rem;width:100%;">
     <div style="font-size:0.9rem;color:var(--muted);">🎉 Jullie kijken vanavond:</div>
     <div id="tmdb-result-content" style="width:100%;"></div>
-    <button class="btn" onclick="startSnackSession()">🍿 Kies snacks</button>
-    <button class="btn" onclick="showScreen('screen-home')" style="background:none;color:var(--muted);border:1.5px solid #333;">← terug naar overzicht</button>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;width:100%;">
+      <button class="btn" onclick="startSnackSession()">🍿 Kies snacks</button>
+      <button class="btn" onclick="startTMDBSwipe(window.currentWinnerTitle)" style="background:var(--surface2);color:var(--text);border:1.5px solid #444;">🎬 Andere film/serie</button>
+      <button class="btn" onclick="showScreen('screen-home')" style="background:none;color:var(--muted);border:1.5px solid #333;">← terug naar overzicht</button>
+    </div>
   </div>
 </div>
 
@@ -1078,6 +1081,10 @@
       </div>
     </div>
     <div id="spec-result" style="font-size:1.4rem; font-weight:700; color:var(--accent); min-height:2rem; margin-top:0.5rem;"></div>
+    <div id="spec-after-btns" style="display:none;flex-direction:column;gap:0.5rem;width:100%;margin-top:1rem;">
+      <button class="btn" onclick="startSnackSession()">🍿 Kies snacks</button>
+      <button class="btn" onclick="showScreen('screen-home')" style="background:none;color:var(--muted);border:1.5px solid #333;">← terug naar overzicht</button>
+    </div>
   </div>
 </div>
 
@@ -1107,7 +1114,11 @@
     </div>
     <div id="nm-result" style="font-size:1.4rem; font-weight:700; color:var(--accent); min-height:2rem;"></div>
   </div>
-  <button class="btn" id="nm-home-btn" style="display:none;" onclick="showScreen('screen-home')">← terug naar overzicht</button>
+  <div id="nm-after-btns" style="display:none;flex-direction:column;gap:0.5rem;width:100%;">
+    <button class="btn" onclick="startSnackSession()">🍿 Kies snacks</button>
+    <button class="btn" onclick="startTMDBSwipe(window.currentWinnerTitle)" style="background:var(--surface2);color:var(--text);border:1.5px solid #444;">🎬 Kies een film/serie</button>
+    <button class="btn" onclick="showScreen('screen-home')" style="background:none;color:var(--muted);border:1.5px solid #333;">← terug naar overzicht</button>
+  </div>
 </div>
 
 <!-- WHEEL -->
@@ -1869,7 +1880,8 @@ function spinNoMatchSlots() {
   setTimeout(async () => {
     const resultEl = document.getElementById('nm-result');
     resultEl.innerHTML = winner.emoji + ' ' + winner.title;
-    document.getElementById('nm-home-btn').style.display = 'block';
+    const nmAfter = document.getElementById('nm-after-btns');
+    if (nmAfter) nmAfter.style.display = 'flex';
     playResult();
 
     // Save slot result to Supabase for spectators
@@ -1918,6 +1930,8 @@ function pollForSlotResult() {
         setTimeout(() => {
           document.getElementById('spec-result').textContent = winner.emoji + ' ' + winner.title;
           playResult();
+          const specAfter = document.getElementById('spec-after-btns');
+          if (specAfter) specAfter.style.display = 'flex';
         }, delays[2] + durations[2] + 200);
       }
     } catch(e) {}
