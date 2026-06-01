@@ -2636,32 +2636,32 @@ const origShowScreen = showScreen;
 // TMDB
 const TMDB_KEY = "64585f049a021773694501b7b9e6fc1b";
 const TMDB_MOVIE_GENRES = {
-  "Comedy":      { genre: 35,    exclude: "16" },
-  "Thriller":    { genre: 53,    exclude: "16,35" },
-  "Actie":       { genre: 28,    exclude: "16" },
-  "Romantiek":   { genre: 10749, exclude: "16" },
-  "Sci-Fi":      { genre: 878,   exclude: "16" },
-  "Mystery":     { genre: 9648,  exclude: "16" },
-  "Horror":      { genre: 27,    exclude: "16,35" },
-  "Animatie":    { genre: 16 },
-  "Documentaire":{ genre: 99 },
-  "Drama":       { genre: 18,    exclude: "16,35,28" },
-  "Crime":       { genre: 80,    exclude: "16,35" },
-  "Superhelden": { genre: 28,    exclude: "16", keywords: "superhero" },
+  "Comedy":      { genres: "35",       exclude: "16,27,53" },
+  "Thriller":    { genres: "53",       exclude: "16,35,27" },
+  "Actie":       { genres: "28",       exclude: "16,35" },
+  "Romantiek":   { genres: "10749",    exclude: "16,27,53,28" },
+  "Sci-Fi":      { genres: "878",      exclude: "16,35" },
+  "Mystery":     { genres: "9648",     exclude: "16,35" },
+  "Horror":      { genres: "27",       exclude: "16,35" },
+  "Animatie":    { genres: "16" },
+  "Documentaire":{ genres: "99" },
+  "Drama":       { genres: "18",       exclude: "16,35,28,27,53,80" },
+  "Crime":       { genres: "80",       exclude: "16,35" },
+  "Superhelden": { genres: "28",       exclude: "16,35", extra: "&with_keywords=9715" },
 };
 const TMDB_TV_GENRES = {
-  "Comedy":      { genre: 35,    exclude: "16" },
-  "Thriller":    { genre: 80,    exclude: "16,35", extra: "&with_keywords=thriller" },
-  "Crime":       { genre: 80,    exclude: "16,35" },
-  "Drama":       { genre: 18,    exclude: "16,35" },
-  "Sci-Fi":      { genre: 10765, exclude: "16" },
-  "Mystery":     { genre: 9648,  exclude: "16,35" },
-  "Horror":      { genre: 9648,  exclude: "16,35", extra: "&with_keywords=horror" },
-  "Romantiek":   { genre: 10749, exclude: "16" },
-  "Documentaire":{ genre: 99 },
-  "Animatie":    { genre: 16 },
-  "Reality":     { genre: 10764 },
-  "Miniserie":   { genre: 18,    exclude: "16", extra: "&with_type=4" },
+  "Comedy":      { genres: "35",       exclude: "16,10764" },
+  "Thriller":    { genres: "80,9648",  exclude: "16,35" },
+  "Crime":       { genres: "80",       exclude: "16,35" },
+  "Drama":       { genres: "18",       exclude: "16,35,80" },
+  "Sci-Fi":      { genres: "10765",    exclude: "16,35" },
+  "Mystery":     { genres: "9648",     exclude: "16,35" },
+  "Horror":      { genres: "10765,9648", exclude: "16,35,80", extra: "&sort_by=vote_average.desc&vote_average.gte=6" },
+  "Romantiek":   { genres: "10749,18", exclude: "16,35,27,80" },
+  "Documentaire":{ genres: "99" },
+  "Animatie":    { genres: "16" },
+  "Reality":     { genres: "10764" },
+  "Miniserie":   { genres: "18",       exclude: "16,35", extra: "&with_type=4" },
 };
 
 const PLATFORM_NAMES = {
@@ -2688,18 +2688,17 @@ async function fetchTMDBFilms(genreTitle) {
 
   const type = isTV ? 'tv' : 'movie';
   const extra = genreObj.extra || '';
-  const keywords = genreObj.keywords ? '&with_keywords=' + genreObj.keywords : '';
   const exclude = genreObj.exclude ? '&without_genres=' + genreObj.exclude : '';
   const page = Math.floor(Math.random() * 3) + 1;
 
   async function doFetch(lang) {
     const url = 'https://api.themoviedb.org/3/discover/' + type +
       '?api_key=' + TMDB_KEY +
-      '&with_genres=' + genreObj.genre +
+      '&with_genres=' + (genreObj.genres || genreObj.genre) +
       '&sort_by=popularity.desc' +
       '&vote_count.gte=50' +
       '&language=' + lang +
-      keywords + exclude + extra +
+      exclude + extra +
       '&page=' + page;
     const res = await fetch(url);
     const data = await res.json();
