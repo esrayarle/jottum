@@ -489,6 +489,48 @@
   .mobile-only { display: none; }
   @media (hover: none) and (pointer: coarse) { .mobile-only { display: block; } }
 
+  #splash-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+  }
+
+  #splash-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #splash-logo {
+    height: 110px;
+    object-fit: contain;
+    animation: splashZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  @keyframes splashZoom {
+    0%   { opacity: 0; transform: scale(0.7); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  #splash-credit {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #666;
+    opacity: 0;
+    animation: splashFadeIn 0.5s ease 0.5s forwards;
+  }
+
+  @keyframes splashFadeIn {
+    to { opacity: 1; }
+  }
+
   .transition-fade { animation: fadeIn 0.25s ease; }
 
   @keyframes fadeIn {
@@ -675,6 +717,10 @@
 </head>
 <body>
 
+<div id="splash-screen">
+  <img id="splash-logo" src="logo.png" alt="Jottum!">
+  <div id="splash-credit">Made with 🤠 by Esra</div>
+</div>
 <canvas id="confetti-canvas"></canvas>
 <div class="header">
   <div style="position:relative; display:flex; align-items:center; justify-content:center; width:100%;">
@@ -3140,6 +3186,15 @@ function addWheelOption() {
   wheelOptions.push(val);
   input.value = '';
   renderTags();
+
+// SPLASH
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    splash.classList.add('fade-out');
+    setTimeout(() => splash.remove(), 500);
+  }, 1500);
+});
   drawWheel();
 }
 
