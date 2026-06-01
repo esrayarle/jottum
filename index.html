@@ -1529,14 +1529,13 @@ function showResult(sessionVotes, sessionPlayers, winnerIdx) {
     listEl.appendChild(row);
   });
 
-  // Show film/serie tip if applicable
+  // Show film/serie tip + action buttons
   const tipEl = document.getElementById('result-tip');
-  const snackEl = null; // replaced by result-after-btns
+  const afterBtns = document.getElementById('result-after-btns');
   if (tipEl) tipEl.style.display = 'none';
-  if (snackEl) snackEl.style.display = 'none';
+  if (afterBtns) afterBtns.style.display = 'none';
 
   if (winner && (currentGame === 'film' || currentGame === 'serie') && winner.tips) {
-    // Use winner index as seed so everyone gets same tip
     const tipIdx = (winnerIdx !== undefined && winnerIdx >= 0 ? winnerIdx : 0) % winner.tips.length;
     const tip = winner.tips[tipIdx];
     const url = STREAMING_LINKS[tip] || ('https://www.google.com/search?q=' + encodeURIComponent(tip + ' streaming'));
@@ -1544,7 +1543,8 @@ function showResult(sessionVotes, sessionPlayers, winnerIdx) {
       tipEl.innerHTML = '🎬 Tip: <a href="' + url + '" target="_blank" style="color:var(--accent3); text-decoration:underline; font-weight:700;">' + tip + '</a>';
       tipEl.style.display = 'block';
     }
-    if (snackEl) snackEl.style.display = 'block';
+    if (afterBtns) { afterBtns.style.display = 'flex'; afterBtns.style.flexDirection = 'column'; }
+    window.currentWinnerTitle = winner.title;
   }
 
   // Show correct buttons based on role
