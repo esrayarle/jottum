@@ -3346,13 +3346,13 @@ function initSplash() {
   const splash = document.getElementById('splash-screen');
   if (!splash) return;
   setTimeout(() => {
+    splash.style.transition = 'opacity 0.6s ease';
     splash.style.opacity = '0';
     splash.style.pointerEvents = 'none';
-    splash.style.visibility = 'hidden';
     setTimeout(() => {
       splash.style.display = 'none';
-    }, 500);
-  }, 2500);
+    }, 650);
+  }, 3500);
 }
 
 setTimeout(initSplash, 100);
