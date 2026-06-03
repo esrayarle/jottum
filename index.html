@@ -522,12 +522,27 @@
     100% { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 18px #ff6b1a55); }
   }
 
-  #splash-credit {
-    font-size: 0.72rem;
-    font-weight: 400;
-    color: #555;
+  #splash-cowboy {
+    font-size: 2.8rem;
     opacity: 0;
-    animation: splashFadeIn 0.5s ease 1s forwards;
+    animation: splashCowboy 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s forwards;
+    display: inline-block;
+  }
+
+  @keyframes splashCowboy {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.5); }
+    60%  { opacity: 1; transform: translateY(-8px) scale(1.15); }
+    80%  { transform: translateY(3px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  #splash-credit {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #777;
+    opacity: 0;
+    animation: splashFadeIn 0.5s ease 1.5s forwards;
+    letter-spacing: 0.2px;
   }
 
   @keyframes splashFadeIn {
@@ -722,7 +737,8 @@
 
 <div id="splash-screen">
   <img id="splash-logo" src="logo.png" alt="Jottum!">
-  <div id="splash-credit">Made with 🤠 by Esra</div>
+  <div id="splash-cowboy">🤠</div>
+  <div id="splash-credit">Made with love by Esra</div>
 </div>
 <canvas id="confetti-canvas"></canvas>
 <div class="header">
@@ -1623,7 +1639,6 @@ function showResult(sessionVotes, sessionPlayers, winnerIdx) {
     }
     if (afterBtns) { afterBtns.style.display = 'flex'; afterBtns.style.flexDirection = 'column'; }
     window.currentWinnerTitle = winner.title;
-    console.log('Winner title saved:', winner.title, 'game:', currentGame);
   }
 
   // Show correct buttons based on role
