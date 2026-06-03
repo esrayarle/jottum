@@ -2778,13 +2778,14 @@ async function fetchTMDBFilms(genreTitle) {
   const exclude = genreObj.exclude ? '&without_genres=' + genreObj.exclude : '';
   const page = Math.floor(Math.random() * 3) + 1;
 
-  async function doFetch(lang) {
+  async function doFetch(origLang, displayLang) {
     const url = 'https://api.themoviedb.org/3/discover/' + type +
       '?api_key=' + TMDB_KEY +
       '&with_genres=' + (genreObj.genres || genreObj.genre) +
       '&sort_by=popularity.desc' +
       '&vote_count.gte=50' +
-      '&language=' + lang +
+      '&with_original_language=' + origLang +
+      '&language=' + displayLang +
       exclude + extra +
       '&page=' + page;
     const res = await fetch(url);
@@ -2793,13 +2794,18 @@ async function fetchTMDBFilms(genreTitle) {
   }
 
   try {
-    console.log('Fetching TMDB for genre:', genreTitle, 'genreObj:', JSON.stringify(genreObj), 'type:', type);
-    let results = await doFetch('nl-NL');
-    console.log('NL results:', results.length);
-    if (results.length < 3) {
-      results = await doFetch('en-US');
-      console.log('EN results:', results.length);
-    }
+    // Fetch English and Dutch results, merge and deduplicate
+    const [enResults, nlResults] = await Promise.all([
+      doFetch('en', 'en-US'),
+      doFetch('nl', 'nl-NL')
+    ]);
+    const seen = new Set();
+    let results = [...enResults, ...nlResults].filter(m => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return true;
+    });
+    if (results.length < 3) results = enResults;
     results = results.slice(0, 10);
 
     // Fetch watch providers for each
