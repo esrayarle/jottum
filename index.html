@@ -2839,26 +2839,62 @@ async function fetchTMDBFilms(genreTitle) {
 }
 
 async function startTMDBSwipe(genreTitle) {
-  console.log('startTMDBSwipe called with:', genreTitle, 'currentGame:', currentGame);
   document.getElementById('tmdb-loading').style.display = 'flex';
   document.getElementById('tmdb-loading').innerHTML = '<div style="font-size:2rem;">🎬</div><p style="color:var(--muted);font-size:0.9rem;">Films ophalen...</p>';
   document.getElementById('tmdb-swipe-area').style.display = 'none';
   showScreen('screen-tmdb');
 
+  // MULTIPLAYER: only host fetches, saves to Supabase, others wait
+  if (sessionId && !isHost) {
+    // Joiner: wait for host to save tmdb_cards
+    pollForTMDBCards();
+    return;
+  }
+
   tmdbCards = await fetchTMDBFilms(genreTitle);
-  console.log('TMDB cards fetched:', tmdbCards.length, 'for genre:', genreTitle);
   if (!tmdbCards.length) {
     document.getElementById('tmdb-loading').innerHTML = '<p style="color:var(--muted)">Geen films gevonden voor "' + genreTitle + '". Probeer opnieuw.</p>';
     return;
   }
 
+  // Save to Supabase if in session
+  if (sessionId && isHost) {
+    try {
+      await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', {
+        tmdb_cards: tmdbCards,
+        tmdb_votes: {},
+        tmdb_winner_index: null
+      });
+    } catch(e) { console.error('Could not save tmdb cards:', e); }
+  }
+
+  initTMDBSwipe();
+}
+
+function initTMDBSwipe() {
   tmdbCurrentIndex = 0;
   tmdbCurrentPlayer = 0;
-  tmdbVotes = [Array(tmdbCards.length).fill(null), Array(tmdbCards.length).fill(null)];
-
+  tmdbVotes = playerNames.map(() => Array(tmdbCards.length).fill(null));
   document.getElementById('tmdb-loading').style.display = 'none';
   document.getElementById('tmdb-swipe-area').style.display = 'flex';
   updateTMDBCard();
+}
+
+function pollForTMDBCards() {
+  document.getElementById('tmdb-loading').innerHTML = '<div style="font-size:2rem;">🎬</div><p style="color:var(--muted);font-size:0.9rem;">Wachten op host...</p>';
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    if (attempts > 30) { clearInterval(interval); return; }
+    try {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=tmdb_cards');
+      if (rows && rows[0] && rows[0].tmdb_cards && rows[0].tmdb_cards.length > 0) {
+        clearInterval(interval);
+        tmdbCards = rows[0].tmdb_cards;
+        initTMDBSwipe();
+      }
+    } catch(e) {}
+  }, 1500);
 }
 
 function updateTMDBCard() {
@@ -2924,18 +2960,103 @@ function voteTMDB(yes) {
   }, 300);
 }
 
-function showTMDBResult() {
+async function showTMDBResult() {
+  // In multiplayer: save votes and wait for all
+  if (sessionId) {
+    try {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=tmdb_votes');
+      const existing = (rows && rows[0] && rows[0].tmdb_votes) || {};
+      existing[myPlayerName] = tmdbVotes[0];
+      await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { tmdb_votes: existing });
+    } catch(e) {}
+
+    // Show waiting screen, poll for all votes
+    document.getElementById('tmdb-swipe-area').style.display = 'none';
+    document.getElementById('tmdb-loading').style.display = 'flex';
+    document.getElementById('tmdb-loading').innerHTML = '<div style="font-size:2rem;">⏳</div><p style="color:var(--muted);font-size:0.9rem;">Wachten op anderen...</p>';
+    pollForTMDBResult();
+    return;
+  }
+
+  renderTMDBResult(tmdbVotes, playerNames);
+}
+
+function pollForTMDBResult() {
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    if (attempts > 60) { clearInterval(interval); return; }
+    try {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=tmdb_votes,players,tmdb_winner_index');
+      if (!rows || !rows[0]) return;
+      const session = rows[0];
+      const players = session.players || [];
+      const votes = session.tmdb_votes || {};
+      const allDone = players.length > 0 && players.every(p => votes[p] && votes[p].length === tmdbCards.length);
+
+      if (allDone) {
+        clearInterval(interval);
+        if (isHost) {
+          // Host calculates winner
+          const winnerIdx = calculateTMDBWinner(votes, players);
+          await sbFetch('sessions?id=eq.' + sessionId, 'PATCH', { tmdb_winner_index: winnerIdx });
+          renderTMDBResult(players.map(p => votes[p] || []), players, winnerIdx);
+        } else {
+          // Non-host polls for winner index
+          pollForTMDBWinnerIndex(votes, players);
+        }
+      }
+    } catch(e) {}
+  }, 1500);
+}
+
+function calculateTMDBWinner(votes, players) {
+  const allVotes = players.map(p => votes[p] || []);
+  for (let i = 0; i < tmdbCards.length; i++) {
+    if (allVotes.every(v => v[i] === true)) return i;
+  }
+  let best = -1, bestCount = 0;
+  for (let i = 0; i < tmdbCards.length; i++) {
+    const count = allVotes.filter(v => v[i] === true).length;
+    if (count > bestCount) { bestCount = count; best = i; }
+  }
+  return best;
+}
+
+function pollForTMDBWinnerIndex(votes, players) {
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    if (attempts > 30) { clearInterval(interval); return; }
+    try {
+      const rows = await sbFetch('sessions?id=eq.' + sessionId + '&select=tmdb_winner_index');
+      if (!rows || !rows[0]) return;
+      const idx = rows[0].tmdb_winner_index;
+      if (idx !== null && idx !== undefined) {
+        clearInterval(interval);
+        renderTMDBResult(players.map(p => votes[p] || []), players, idx);
+      }
+    } catch(e) {}
+  }, 1500);
+}
+
+function renderTMDBResult(allVotesArr, allPlayerNames, winnerIdx) {
   const matches = [], partial = [];
   tmdbCards.forEach((card, i) => {
-    const v1 = tmdbVotes[0][i];
-    const v2 = playerNames.length > 1 ? tmdbVotes[1][i] : true;
+    const v1 = allVotesArr[0] ? allVotesArr[0][i] : null;
+    const v2 = allPlayerNames.length > 1 && allVotesArr[1] ? allVotesArr[1][i] : true;
     if (v1 && v2) matches.push({ card, v1, v2 });
     else if (v1 || v2) partial.push({ card, v1, v2 });
   });
 
-  const winner = matches.length > 0
-    ? matches[Math.floor(Math.random() * matches.length)].card
-    : partial.length > 0 ? partial[0].card : null;
+  let winner;
+  if (winnerIdx !== undefined && winnerIdx >= 0) {
+    winner = tmdbCards[winnerIdx];
+  } else {
+    winner = matches.length > 0
+      ? matches[Math.floor(Math.random() * matches.length)].card
+      : partial.length > 0 ? partial[0].card : null;
+  }
 
   if (matches.length > 0) { launchConfetti(); playResult(); }
 
@@ -2959,6 +3080,7 @@ function showTMDBResult() {
     resEl.innerHTML = '<p style="color:var(--muted)">Geen match gevonden.</p>';
   }
 
+  document.getElementById('tmdb-loading').style.display = 'none';
   document.getElementById('tmdb-swipe-area').style.display = 'none';
   document.getElementById('tmdb-handoff').style.display = 'none';
   document.getElementById('tmdb-result').style.display = 'flex';
